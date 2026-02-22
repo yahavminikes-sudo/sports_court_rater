@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/loginFragment">
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.sports_court_rater.ui.login.LoginFragment"
+        android:label="LoginFragment"
+        tools:layout="@layout/fragment_login">
+        <action
+            android:id="@+id/action_loginFragment_to_signUpFragment"
+            app:destination="@id/signUpFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/signUpFragment"
+        android:name="com.example.sports_court_rater.ui.signup.SignUpFragment"
+        android:label="SignUpFragment"
+        tools:layout="@layout/fragment_sign_up">
+        <action
+            android:id="@+id/action_signUpFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.sports_court_rater.ui.home.HomeFragment"
+        android:label="HomeFragment"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_homeFragment_to_courtInfoFragment"
+            app:destination="@id/courtInfoFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_addCourtFragment"
+            app:destination="@id/addCourtFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_searchFragment"
+            app:destination="@id/searchFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_profileFragment"
+            app:destination="@id/profileFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/courtInfoFragment"
+        android:name="com.example.sports_court_rater.ui.courtinfo.CourtInfoFragment"
+        android:label="CourtInfoFragment"
+        tools:layout="@layout/fragment_court_info">
+        <argument
+            android:name="courtId"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addCourtFragment"
+        android:name="com.example.sports_court_rater.ui.addcourt.AddCourtFragment"
+        android:label="AddCourtFragment"
+        tools:layout="@layout/fragment_add_court" />
+
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="com.example.sports_court_rater.ui.search.SearchFragment"
+        android:label="SearchFragment"
+        tools:layout="@layout/fragment_search" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.sports_court_rater.ui.profile.ProfileFragment"
+        android:label="ProfileFragment"
+        tools:layout="@layout/fragment_profile" />
+
+</navigation>
