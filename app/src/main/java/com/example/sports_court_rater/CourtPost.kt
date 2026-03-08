@@ -7,12 +7,12 @@ import java.util.UUID
 @Entity(tableName = "court_posts")
 data class CourtPost(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
-    val creatorId: String,
-    val courtName: String,
-    val sportType: String,
-    val latitude: Double,
-    val longitude: Double,
-    val imageUrl: String,
-    val rating: Float,
-    val description: String
+    val creatorId: String = "",
+    val courtName: String = "",
+    val sportType: String = "",
+    val latitude: Double = 0.0,
+    val longitude: Double = 0.0,
+    val imageUrl: String = "",
+    val rating: Float = 0f,
+    val description: String = ""
 )
