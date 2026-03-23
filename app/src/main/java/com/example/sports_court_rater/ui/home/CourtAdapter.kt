@@ -5,12 +5,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.sports_court_rater.CourtPost
+import com.example.sports_court_rater.Court
 import com.example.sports_court_rater.databinding.ItemCourtBinding
 import com.squareup.picasso.Picasso
 
 class CourtAdapter(private val onCourtClick: (String) -> Unit) :
-    ListAdapter<CourtPost, CourtAdapter.CourtViewHolder>(CourtDiffCallback()) {
+    ListAdapter<Court, CourtAdapter.CourtViewHolder>(CourtDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CourtViewHolder {
         val binding = ItemCourtBinding.inflate(
@@ -28,7 +28,7 @@ class CourtAdapter(private val onCourtClick: (String) -> Unit) :
     inner class CourtViewHolder(private val binding: ItemCourtBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(court: CourtPost) {
+        fun bind(court: Court) {
             binding.apply {
                 tvCourtName.text = court.courtName
                 tvSportType.text = court.sportType
@@ -54,12 +54,12 @@ class CourtAdapter(private val onCourtClick: (String) -> Unit) :
         }
     }
 
-    class CourtDiffCallback : DiffUtil.ItemCallback<CourtPost>() {
-        override fun areItemsTheSame(oldItem: CourtPost, newItem: CourtPost): Boolean {
+    class CourtDiffCallback : DiffUtil.ItemCallback<Court>() {
+        override fun areItemsTheSame(oldItem: Court, newItem: Court): Boolean {
             return oldItem.id == newItem.id
         }
 
-        override fun areContentsTheSame(oldItem: CourtPost, newItem: CourtPost): Boolean {
+        override fun areContentsTheSame(oldItem: Court, newItem: Court): Boolean {
             return oldItem == newItem
         }
     }

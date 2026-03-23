@@ -3,7 +3,7 @@ package com.example.sports_court_rater.di
 import android.content.Context
 import androidx.room.Room
 import com.example.sports_court_rater.data.local.AppDatabase
-import com.example.sports_court_rater.data.local.CourtPostDao
+import com.example.sports_court_rater.data.local.CourtDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,7 +26,7 @@ object DatabaseModule {
     }
 
     @Provides
-    fun provideCourtPostDao(database: AppDatabase): CourtPostDao {
-        return database.courtPostDao()
+    fun provideCourtDao(database: AppDatabase): CourtDao {
+        return database.courtDao()
     }
 }

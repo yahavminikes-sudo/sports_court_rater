@@ -5,23 +5,23 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Delete
-import com.example.sports_court_rater.CourtPost
+import com.example.sports_court_rater.Court
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface CourtPostDao {
+interface CourtDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(post: CourtPost)
+    suspend fun insert(court: Court)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(posts: List<CourtPost>)
+    suspend fun insertAll(courts: List<Court>)
 
-    @Query("SELECT * FROM court_posts")
-    fun getAll(): Flow<List<CourtPost>>
+    @Query("SELECT * FROM courts")
+    fun getAll(): Flow<List<Court>>
 
     @Delete
-    suspend fun delete(post: CourtPost)
+    suspend fun delete(court: Court)
     
-    @Query("DELETE FROM court_posts")
+    @Query("DELETE FROM courts")
     suspend fun deleteAll()
 }

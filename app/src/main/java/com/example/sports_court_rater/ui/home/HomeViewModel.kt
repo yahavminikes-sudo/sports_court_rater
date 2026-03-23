@@ -2,7 +2,7 @@ package com.example.sports_court_rater.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.sports_court_rater.CourtPost
+import com.example.sports_court_rater.Court
 import com.example.sports_court_rater.data.CourtRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +19,7 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
 
     // StateFlow that collects from the repository's Flow
-    val courts: StateFlow<List<CourtPost>> = repository.getAllCourts()
+    val courts: StateFlow<List<Court>> = repository.getAllCourts()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
