@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">sports_court_rater</string>
+    <string name="court_image">תמונת מגרש</string>
 </resources>
