@@ -1,4 +1,22 @@
 <resources>
     <string name="app_name">sports_court_rater</string>
     <string name="court_image">תמונת מגרש</string>
+
+    <!-- Home Screen -->
+    <string name="home_header_title">מנצח מגרש</string>
+    <string name="home_header_subtitle">מצא את המגרש המושלם לך</string>
+
+    <!-- Add Court Screen -->
+    <string name="add_court_title">הוספת מגרש חדש</string>
+    <string name="add_court_name_hint">שם המגרש</string>
+    <string name="add_court_sport_type_hint">סוג ספורט</string>
+    <string name="add_court_description_hint">תיאור</string>
+    <string name="add_court_image_url_hint">קישור לתמונה</string>
+    <string name="add_court_save_button">שמור מגרש</string>
+
+    <!-- Item Court -->
+    <string name="court_location_placeholder">רמת אביב, תל אביב</string>
+    <string name="court_name_placeholder">מגרש כדורגל</string>
+    <string name="court_review_count_placeholder">(50)</string>
+    <string name="court_sport_type_placeholder">כדורגל</string>
 </resources>
