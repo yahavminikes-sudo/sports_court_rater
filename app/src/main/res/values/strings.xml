@@ -19,4 +19,19 @@
     <string name="court_name_placeholder">מגרש כדורגל</string>
     <string name="court_review_count_placeholder">(50)</string>
     <string name="court_sport_type_placeholder">כדורגל</string>
+    <string name="court_sport_description_placeholder">מגרש מצוין. מומלץ</string>
+
+    <!-- Court Info -->
+    <string name="weather_format">%.0f°C\n%s</string>
+    <string name="location_label">מיקום</string>
+    <string name="description_label">תיאור</string>
+    <string name="posted_by_label">פורסם על ידי</string>
+    <string name="reviews_label">דירוגים (%d)</string>
+    <string name="no_reviews_yet">אין עדיין דירוגים למגרש זה</string>
+    <string name="rating_count_format">(%d דירוגים)</string>
+    <string name="back_button_desc">חזרה</string>
+    <string name="weather_icon_desc">סמל מזג אוויר</string>
+    <string name="location_icon_desc">סמל מיקום</string>
+    <string name="creator_image_desc">תמונת המפרסם</string>
+    <string name="reviews_icon_desc">סמל דירוגים</string>
 </resources>

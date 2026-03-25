@@ -19,6 +19,9 @@ interface CourtDao {
     @Query("SELECT * FROM courts")
     fun getAll(): Flow<List<Court>>
 
+    @Query("SELECT * FROM courts WHERE id = :id")
+    suspend fun getById(id: String): Court?
+
     @Delete
     suspend fun delete(court: Court)
     

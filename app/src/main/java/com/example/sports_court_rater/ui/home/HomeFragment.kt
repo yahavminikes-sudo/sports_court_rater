@@ -42,9 +42,8 @@ class HomeFragment : Fragment() {
 
     private fun setupRecyclerView() {
         adapter = CourtAdapter { courtId ->
-            // Assuming there's a navigation action to the detail screen
-            // val action = HomeFragmentDirections.actionHomeFragmentToCourtInfoFragment(courtId)
-            // findNavController().navigate(action)
+            val action = HomeFragmentDirections.actionHomeFragmentToCourtInfoFragment(courtId)
+            findNavController().navigate(action)
         }
         binding.rvCourts.adapter = adapter
     }

@@ -38,4 +38,8 @@ class CourtRepository @Inject constructor(
     fun getAllCourts(): Flow<List<Court>> {
         return courtDao.getAll()
     }
+
+    suspend fun getCourtById(id: String): Court? {
+        return courtDao.getById(id)
+    }
 }
