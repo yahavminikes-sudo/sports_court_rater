@@ -6,6 +6,7 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
     android:layout_marginVertical="8dp"
+    android:layoutDirection="rtl"
     app:cardCornerRadius="16dp"
     app:cardElevation="2dp"
     app:strokeWidth="0dp">
@@ -19,7 +20,7 @@
             android:id="@+id/flImageContainer"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="@color/gray_200"
+            android:background="#EEEEEE"
             app:layout_constraintDimensionRatio="H,16:10"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -32,16 +33,19 @@
                 android:contentDescription="@null"
                 android:scaleType="centerCrop" />
 
-            <!-- Sport Type Badge (top right) -->
+            <!-- Sport Type Badge -->
             <TextView
                 android:id="@+id/tvSportType"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="top|end"
+                android:layout_gravity="top|start"
                 android:layout_margin="12dp"
-                android:textColor="@color/gray_700"
+                android:background="@drawable/bg_chip_selected"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp"
+                android:textColor="@android:color/white"
                 android:textSize="12sp"
-                tools:text="@string/court_sport_type_placeholder" />
+                tools:text="כדורסל" />
 
         </FrameLayout>
 
@@ -57,13 +61,14 @@
                 android:id="@+id/tvCourtName"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:textColor="@color/black"
+                android:gravity="start"
+                android:textColor="@android:color/black"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:text="@string/court_name_placeholder" />
+                tools:text="מגרש ספורט רמת אביב" />
 
             <!-- Rating Section -->
             <LinearLayout
@@ -73,17 +78,8 @@
                 android:layout_marginTop="4dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tvCourtName">
-
-                <TextView
-                    android:id="@+id/tvReviewCount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:textColor="@color/gray_700"
-                    android:textSize="14sp"
-                    tools:text="@string/court_review_count_placeholder" />
 
                 <androidx.appcompat.widget.AppCompatRatingBar
                     android:id="@+id/rbRating"
@@ -92,8 +88,17 @@
                     android:layout_height="wrap_content"
                     android:isIndicator="true"
                     android:numStars="5"
-                    android:progressTint="@color/rating_star"
+                    android:progressTint="#FFC107"
                     android:stepSize="0.5" />
+
+                <TextView
+                    android:id="@+id/tvReviewCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:textColor="#757575"
+                    android:textSize="14sp"
+                    tools:text="(12)" />
 
             </LinearLayout>
 
@@ -104,24 +109,24 @@
                 android:layout_marginTop="4dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/llRating">
-
-                <TextView
-                    android:id="@+id/tvLocation"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="4dp"
-                    android:textColor="@color/gray_700"
-                    android:textSize="12sp"
-                    tools:text="@string/court_location_placeholder" />
 
                 <ImageView
                     android:layout_width="14dp"
                     android:layout_height="14dp"
                     android:contentDescription="@null"
                     android:src="@android:drawable/ic_menu_mylocation"
-                    app:tint="@color/gray_700" />
+                    app:tint="#757575" />
+
+                <TextView
+                    android:id="@+id/tvLocation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:textColor="#757575"
+                    android:textSize="12sp"
+                    tools:text="תל אביב" />
 
             </LinearLayout>
 

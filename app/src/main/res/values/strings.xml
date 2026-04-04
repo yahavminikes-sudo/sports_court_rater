@@ -34,4 +34,14 @@
     <string name="location_icon_desc">סמל מיקום</string>
     <string name="creator_image_desc">תמונת המפרסם</string>
     <string name="reviews_icon_desc">סמל דירוגים</string>
+
+    <!-- Search Screen -->
+    <string name="search_hint">חפש מגרש…</string>
+    <string name="sport_type_label">סוג ספורט</string>
+    <string name="all_sports">הכל</string>
+    <string name="basketball">כדורסל</string>
+    <string name="football">כדורגל</string>
+    <string name="tennis">טניס</string>
+    <string name="min_rating_label">דירוג מינימלי</string>
+    <string name="courts_found_format">%d מגרשים נמצאו</string>
 </resources>
