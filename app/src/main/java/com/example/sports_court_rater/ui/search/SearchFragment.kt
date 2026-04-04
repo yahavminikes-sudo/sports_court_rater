@@ -72,8 +72,10 @@ class SearchFragment : Fragment() {
         }
 
         binding.btnFilter.setOnClickListener {
-            val isVisible = binding.cvFilters.isVisible
-            binding.cvFilters.visibility = if (isVisible) View.GONE else View.VISIBLE
+            val isCurrentlyVisible = binding.cvFilters.isVisible
+            val newVisibility = !isCurrentlyVisible
+            binding.cvFilters.isVisible = newVisibility
+            binding.btnFilter.isSelected = newVisibility
         }
     }
 
