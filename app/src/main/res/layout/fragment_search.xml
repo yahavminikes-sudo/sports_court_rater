@@ -34,7 +34,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginEnd="8dp"
-                android:src="@android:drawable/ic_menu_search"
+                android:src="@drawable/ic_search_custom"
                 app:tint="#71837B" />
 
             <EditText
@@ -105,14 +105,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
-                android:layout_marginTop="16dp"
                 android:text="@string/min_rating_label"
                 android:textColor="#333333"
                 android:textStyle="bold" />
 
             <androidx.appcompat.widget.AppCompatRatingBar
                 android:id="@+id/rbMinRating"
-                style="?android:attr/ratingBarStyle"
+                style="?android:attr/ratingBarStyleIndicator"
+                android:isIndicator="false"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
