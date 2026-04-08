@@ -63,4 +63,12 @@
     <string name="display_name_hint">ישראל ישראלי</string>
     <string name="register_button">הירשם</string>
     <string name="already_have_account_text">יש לך חשבון? התחבר</string>
+
+    <!-- Profile Screen -->
+    <string name="profile_my_courts">המגרשים שלי</string>
+    <string name="profile_my_ratings">הדירוגים שלי</string>
+    <string name="profile_courts_count_label">מגרשים</string>
+    <string name="profile_ratings_count_label">דירוגים</string>
+    <string name="profile_empty_courts">עדיין לא פרסמת מגרשים</string>
+    <string name="profile_logout_desc">התנתקות</string>
 </resources>

@@ -60,6 +60,7 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
     implementation(libs.play.services.tasks)
     ksp("com.squareup:javapoet:1.13.0")
     implementation("com.squareup.picasso:picasso:2.71828")
