@@ -3,7 +3,7 @@
     <string name="court_image">תמונת מגרש</string>
 
     <!-- Home Screen -->
-    <string name="home_header_title">מנצח מגרש</string>
+    <string name="home_header_title">מגרש מנצח</string>
     <string name="home_header_subtitle">מצא את המגרש המושלם לך</string>
 
     <!-- Add Court Screen -->
@@ -54,10 +54,11 @@
     <string name="login_button">התחבר</string>
     <string name="no_account_text">אין לך חשבון? הירשם</string>
     <string name="login_subtitle">מצא ודרג מגרשי ספורט</string>
-    <string name="app_footer_text">גרסה 1.0.0 • מנצח מגרש</string>
+    <string name="app_footer_text">גרסה 1.0.0 • מגרש מנצח</string>
 
     <!-- Sign Up Screen -->
     <string name="signup_title">הרשמה</string>
+    <string name="signup_subtitle">מצא ודרג מגרשי ספורט</string>
     <string name="display_name_label">שם מלא</string>
     <string name="display_name_hint">ישראל ישראלי</string>
     <string name="register_button">הירשם</string>
