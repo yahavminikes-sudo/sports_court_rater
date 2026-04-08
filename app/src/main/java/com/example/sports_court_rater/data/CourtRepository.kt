@@ -1,8 +1,10 @@
 package com.example.sports_court_rater.data
 
 import com.example.sports_court_rater.Court
+import com.example.sports_court_rater.Review
 import com.example.sports_court_rater.data.local.CourtDao
 import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Source
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
@@ -10,6 +12,7 @@ import javax.inject.Inject
 
 class CourtRepository @Inject constructor(
     private val courtDao: CourtDao,
+    private val firestore: FirebaseFirestore,
     private val remoteDataSource: CollectionReference
 ) {
 
@@ -41,5 +44,32 @@ class CourtRepository @Inject constructor(
 
     suspend fun getCourtById(id: String): Court? {
         return courtDao.getById(id)
+    }
+
+    /**
+     * Fetches courts created by a specific user from Firestore.
+     */
+    suspend fun getCourtsByCreatorId(creatorId: String): List<Court> {
+        return try {
+            val snapshot = remoteDataSource.whereEqualTo("creatorId", creatorId).get().await()
+            snapshot.toObjects(Court::class.java)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    /**
+     * Fetches reviews created by a specific user from Firestore.
+     */
+    suspend fun getReviewsByCreatorId(creatorId: String): List<Review> {
+        return try {
+            val snapshot = firestore.collection("reviews")
+                .whereEqualTo("creatorId", creatorId)
+                .get()
+                .await()
+            snapshot.toObjects(Review::class.java)
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 }
