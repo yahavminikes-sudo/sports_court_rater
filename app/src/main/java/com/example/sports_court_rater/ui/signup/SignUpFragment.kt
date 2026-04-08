@@ -1,10 +1,16 @@
 package com.example.sports_court_rater.ui.signup
 
+import android.graphics.Typeface
 import android.os.Bundle
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.RelativeSizeSpan
+import android.text.style.StyleSpan
 import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -84,10 +90,39 @@ class SignUpFragment : Fragment() {
     }
 
     private fun showError(message: String) {
-        val snackbar = Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG)
+        val title = "שגיאה"
+        val spannable = SpannableStringBuilder("$title\n$message")
+
+        spannable.setSpan(
+            StyleSpan(Typeface.BOLD),
+            0,
+            title.length,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        spannable.setSpan(
+            RelativeSizeSpan(1.1f),
+            0,
+            title.length,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+
+        val snackbar = Snackbar.make(binding.root, spannable, Snackbar.LENGTH_LONG)
         snackbar.setBackgroundTint(resources.getColor(android.R.color.holo_red_dark, null))
         snackbar.setTextColor(resources.getColor(android.R.color.white, null))
-        ViewCompat.setLayoutDirection(snackbar.view, ViewCompat.LAYOUT_DIRECTION_RTL)
+        
+        val snackbarView = snackbar.view
+        ViewCompat.setLayoutDirection(snackbarView, ViewCompat.LAYOUT_DIRECTION_RTL)
+
+        val params = snackbarView.layoutParams as? ViewGroup.MarginLayoutParams
+        if (params != null) {
+            val margin = (24 * resources.displayMetrics.density).toInt()
+            params.setMargins(margin, 0, margin, margin)
+            snackbarView.layoutParams = params
+        }
+
+        val textView = snackbarView.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
+        textView.maxLines = 4
+
         snackbar.show()
     }
 
