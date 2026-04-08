@@ -1,0 +1,11 @@
+<resources>
+    <!-- Login Screen -->
+    <string name="login_title">התחברות</string>
+    <string name="email_label">אימייל</string>
+    <string name="email_hint">example@email.com</string>
+    <string name="password_label">סיסמה</string>
+    <string name="password_hint">לפחות 6 תווים</string>
+    <string name="login_button">התחבר</string>
+    <string name="no_account_text">אין לך חשבון? הירשם</string>
+    <string name="app_footer_text">גרסה 1.0.0 • מנצח מגרש</string>
+</resources>
