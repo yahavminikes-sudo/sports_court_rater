@@ -106,10 +106,10 @@ class LoginFragment : Fragment() {
         )
 
         val snackbar = Snackbar.make(binding.root, spannable, Snackbar.LENGTH_LONG)
-        snackbar.setBackgroundTint(resources.getColor(android.R.color.holo_red_dark, null))
         snackbar.setTextColor(resources.getColor(android.R.color.white, null))
         
         val snackbarView = snackbar.view
+        snackbarView.setBackgroundResource(R.drawable.bg_snackbar_error)
         ViewCompat.setLayoutDirection(snackbarView, ViewCompat.LAYOUT_DIRECTION_RTL)
 
         val params = snackbarView.layoutParams as? ViewGroup.MarginLayoutParams
