@@ -96,9 +96,12 @@ class LoginFragment : Fragment() {
             message.contains("invalid-credential", ignoreCase = true) || 
             message.contains("wrong-password", ignoreCase = true) ||
             message.contains("user-not-found", ignoreCase = true) ||
-            message.contains("no user", ignoreCase = true) -> "אימייל או סיסמה לא נכונים"
+            message.contains("no user", ignoreCase = true) ||
+            message.contains("incorrect, malformed or has expired", ignoreCase = true) -> "אימייל או סיסמה לא נכונים"
             message.contains("network error", ignoreCase = true) -> "שגיאת רשת, אנא נסה שוב מאוחר יותר"
-            message.contains("too many requests", ignoreCase = true) -> "יותר מדי ניסיונות כושלים, אנא נסה שוב מאוחר יותר"
+            message.contains("too many requests", ignoreCase = true) ||
+            message.contains("blocked all requests", ignoreCase = true) ||
+            message.contains("unusual activity", ignoreCase = true) -> "יותר מדי ניסיונות כושלים, אנא נסה שוב מאוחר יותר"
             else -> "ההתחברות נכשלה: $message"
         }
     }
