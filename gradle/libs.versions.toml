@@ -15,11 +15,11 @@ hilt = "2.51.1"
 playServicesTasks = "1.8.1"
 googleServices = "4.4.2"
 firebaseBom = "34.9.0"
-navigationFragmentKtx = "2.9.7"
-navigationUiKtx = "2.9.7"
+navigationFragmentKtx = "2.5.3"
+navigationUiKtx = "2.5.3"
 retrofit = "2.11.0"
 okhttp = "4.12.0"
-navigationSafeArgs = "2.9.7"
+navigationSafeArgs = "2.5.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

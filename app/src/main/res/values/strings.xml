@@ -44,4 +44,22 @@
     <string name="tennis">טניס</string>
     <string name="min_rating_label">דירוג מינימלי</string>
     <string name="courts_found_format">%d מגרשים נמצאו</string>
+
+    <!-- Login Screen -->
+    <string name="login_title">התחברות</string>
+    <string name="email_label">אימייל</string>
+    <string name="email_hint">example@email.com</string>
+    <string name="password_label">סיסמה</string>
+    <string name="password_hint">לפחות 6 תווים</string>
+    <string name="login_button">התחבר</string>
+    <string name="no_account_text">אין לך חשבון? הירשם</string>
+    <string name="login_subtitle">מצא ודרג מגרשי ספורט</string>
+    <string name="app_footer_text">גרסה 1.0.0 • מנצח מגרש</string>
+
+    <!-- Sign Up Screen -->
+    <string name="signup_title">הרשמה</string>
+    <string name="display_name_label">שם מלא</string>
+    <string name="display_name_hint">ישראל ישראלי</string>
+    <string name="register_button">הירשם</string>
+    <string name="already_have_account_text">יש לך חשבון? התחבר</string>
 </resources>
