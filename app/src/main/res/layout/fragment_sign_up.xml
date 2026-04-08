@@ -44,7 +44,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="@string/login_subtitle"
+            android:text="@string/signup_subtitle"
             android:textColor="@color/gray_500"
             android:textSize="13sp" />
     </LinearLayout>
@@ -109,6 +109,9 @@
                     android:drawablePadding="12dp"
                     android:hint="@string/display_name_hint"
                     android:inputType="textPersonName"
+                    android:textDirection="rtl"
+                    android:textAlignment="viewStart"
+                    android:gravity="start|center_vertical"
                     android:paddingTop="0dp"
                     android:paddingBottom="0dp"
                     android:textColor="@color/black"
@@ -147,6 +150,9 @@
                     android:drawablePadding="12dp"
                     android:hint="@string/email_hint"
                     android:inputType="textEmailAddress"
+                    android:textDirection="rtl"
+                    android:textAlignment="viewStart"
+                    android:gravity="start|center_vertical"
                     android:paddingTop="0dp"
                     android:paddingBottom="0dp"
                     android:textColor="@color/black"
@@ -175,7 +181,8 @@
                 app:boxCornerRadiusTopStart="12dp"
                 app:boxStrokeWidth="0dp"
                 app:boxStrokeWidthFocused="0dp"
-                app:hintEnabled="false">
+                app:hintEnabled="false"
+                app:passwordToggleEnabled="true">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/et_password"
@@ -185,6 +192,9 @@
                     android:drawablePadding="12dp"
                     android:hint="@string/password_hint"
                     android:inputType="textPassword"
+                    android:textDirection="rtl"
+                    android:textAlignment="viewStart"
+                    android:gravity="start|center_vertical"
                     android:paddingTop="0dp"
                     android:paddingBottom="0dp"
                     android:textColor="@color/black"
