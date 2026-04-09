@@ -75,18 +75,18 @@ class AddCourtFragment : Fragment() {
     }
 
     private fun setupListeners() {
-        binding.btnUseCurrentLocation.setOnClickListener {
+        binding.btnCurrentLocation.setOnClickListener {
             checkLocationPermissions()
         }
 
         binding.llBasketball.setOnClickListener {
-            viewModel.setSport("כדורסל")
+            viewModel.setSport(getString(R.string.basketball))
         }
         binding.llFootball.setOnClickListener {
-            viewModel.setSport("כדורגל")
+            viewModel.setSport(getString(R.string.football))
         }
         binding.llTennis.setOnClickListener {
-            viewModel.setSport("טניס")
+            viewModel.setSport(getString(R.string.tennis))
         }
 
         binding.btnSelectImage.setOnClickListener {
@@ -97,7 +97,7 @@ class AddCourtFragment : Fragment() {
             publishCourt()
         }
 
-        binding.btnCancel.setOnClickListener {
+        binding.btnBack.setOnClickListener {
             handleBackNavigation()
         }
     }
@@ -168,7 +168,6 @@ class AddCourtFragment : Fragment() {
                         is AddCourtViewModel.AddCourtState.Loading -> {
                             binding.progressBar.visibility = View.VISIBLE
                             binding.btnPostCourt.isEnabled = false
-                            binding.btnCancel.isEnabled = false
                         }
                         is AddCourtViewModel.AddCourtState.Success -> {
                             binding.progressBar.visibility = View.GONE
@@ -183,13 +182,11 @@ class AddCourtFragment : Fragment() {
                         is AddCourtViewModel.AddCourtState.Error -> {
                             binding.progressBar.visibility = View.GONE
                             binding.btnPostCourt.isEnabled = true
-                            binding.btnCancel.isEnabled = true
                             Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
                         }
                         is AddCourtViewModel.AddCourtState.Idle -> {
                             binding.progressBar.visibility = View.GONE
                             binding.btnPostCourt.isEnabled = true
-                            binding.btnCancel.isEnabled = true
                         }
                     }
                 }
@@ -216,15 +213,15 @@ class AddCourtFragment : Fragment() {
 
         // Apply selected
         when (selectedSport) {
-            "כדורסל" -> {
+            getString(R.string.basketball) -> {
                 binding.llBasketball.setBackgroundResource(selectedBg)
                 binding.tvBasketballLabel.setTextColor(selectedTextColor)
             }
-            "כדורגל" -> {
+            getString(R.string.football) -> {
                 binding.llFootball.setBackgroundResource(selectedBg)
                 binding.tvFootballLabel.setTextColor(selectedTextColor)
             }
-            "טניס" -> {
+            getString(R.string.tennis) -> {
                 binding.llTennis.setBackgroundResource(selectedBg)
                 binding.tvTennisLabel.setTextColor(selectedTextColor)
             }

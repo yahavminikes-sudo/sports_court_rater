@@ -87,10 +87,21 @@ class CourtInfoFragment : Fragment() {
                             binding.ratingBar.rating = it.rating
                             
                             if (it.imageUrl.isNotEmpty()) {
+                                binding.ivCourtImage.visibility = View.VISIBLE
+                                binding.flDefaultEmojiContainer.visibility = View.GONE
                                 Picasso.get()
                                     .load(it.imageUrl)
                                     .placeholder(R.drawable.ic_launcher_background)
                                     .into(binding.ivCourtImage)
+                            } else {
+                                binding.ivCourtImage.visibility = View.GONE
+                                binding.flDefaultEmojiContainer.visibility = View.VISIBLE
+                                binding.tvDefaultEmoji.text = when (it.sportType) {
+                                    getString(R.string.basketball) -> getString(R.string.emoji_basketball)
+                                    getString(R.string.football) -> getString(R.string.emoji_football)
+                                    getString(R.string.tennis) -> getString(R.string.emoji_tennis)
+                                    else -> getString(R.string.emoji_football)
+                                }
                             }
                         }
                     }

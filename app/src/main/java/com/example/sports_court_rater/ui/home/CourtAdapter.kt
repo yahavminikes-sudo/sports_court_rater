@@ -1,11 +1,13 @@
 package com.example.sports_court_rater.ui.home
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sports_court_rater.Court
+import com.example.sports_court_rater.R
 import com.example.sports_court_rater.databinding.ItemCourtBinding
 import com.squareup.picasso.Picasso
 
@@ -39,13 +41,22 @@ class CourtAdapter(
                 tvReviewCount.text = ""
 
                 if (court.imageUrl.isNotEmpty()) {
+                    ivCourtImage.visibility = View.VISIBLE
+                    flDefaultEmojiContainer.visibility = View.GONE
                     Picasso.get()
                         .load(court.imageUrl)
                         .placeholder(android.R.drawable.ic_menu_gallery)
                         .error(android.R.drawable.ic_menu_report_image)
                         .into(ivCourtImage)
                 } else {
-                    ivCourtImage.setImageResource(android.R.drawable.ic_menu_gallery)
+                    ivCourtImage.visibility = View.GONE
+                    flDefaultEmojiContainer.visibility = View.VISIBLE
+                    tvDefaultEmoji.text = when (court.sportType) {
+                        root.context.getString(R.string.basketball) -> root.context.getString(R.string.emoji_basketball)
+                        root.context.getString(R.string.football) -> root.context.getString(R.string.emoji_football)
+                        root.context.getString(R.string.tennis) -> root.context.getString(R.string.emoji_tennis)
+                        else -> root.context.getString(R.string.emoji_football)
+                    }
                 }
 
                 root.setOnClickListener {

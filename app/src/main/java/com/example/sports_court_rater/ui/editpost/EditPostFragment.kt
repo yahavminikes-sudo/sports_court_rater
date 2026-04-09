@@ -31,7 +31,7 @@ class EditPostFragment : Fragment() {
     private val args: EditPostFragmentArgs by navArgs()
 
     private var selectedImageUri: Uri? = null
-    private var currentSelectedSport: String = "כדורסל"
+    private var currentSelectedSport: String = ""
 
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
@@ -70,7 +70,7 @@ class EditPostFragment : Fragment() {
             ratingBar.rating = court.rating
             etLocation.setText("${court.latitude}, ${court.longitude}")
             etLocation.isEnabled = false 
-            btnUseCurrentLocation.visibility = View.GONE
+            btnCurrentLocation.visibility = View.GONE
             
             updateSportSelectionUI(currentSelectedSport)
             
@@ -78,6 +78,9 @@ class EditPostFragment : Fragment() {
                 Picasso.get().load(court.imageUrl).into(ivCourtImage)
                 ivCourtImage.visibility = View.VISIBLE
                 placeholderContainer.visibility = View.GONE
+            } else {
+                ivCourtImage.visibility = View.GONE
+                placeholderContainer.visibility = View.VISIBLE
             }
             
             btnPostCourt.text = "עדכון מגרש"
@@ -90,15 +93,15 @@ class EditPostFragment : Fragment() {
         }
 
         binding.llBasketball.setOnClickListener {
-            currentSelectedSport = "כדורסל"
+            currentSelectedSport = getString(R.string.basketball)
             updateSportSelectionUI(currentSelectedSport)
         }
         binding.llFootball.setOnClickListener {
-            currentSelectedSport = "כדורגל"
+            currentSelectedSport = getString(R.string.football)
             updateSportSelectionUI(currentSelectedSport)
         }
         binding.llTennis.setOnClickListener {
-            currentSelectedSport = "טניס"
+            currentSelectedSport = getString(R.string.tennis)
             updateSportSelectionUI(currentSelectedSport)
         }
 
@@ -114,7 +117,7 @@ class EditPostFragment : Fragment() {
             }
         }
 
-        binding.btnCancel.setOnClickListener {
+        binding.btnBack.setOnClickListener {
             handleBackNavigation()
         }
     }
@@ -132,14 +135,14 @@ class EditPostFragment : Fragment() {
         val unselectedTextColor = ContextCompat.getColor(requireContext(), R.color.gray_700)
 
         binding.apply {
-            llBasketball.setBackgroundResource(if (selectedSport == "כדורסל") selectedBg else unselectedBg)
-            tvBasketballLabel.setTextColor(if (selectedSport == "כדורסל") selectedTextColor else unselectedTextColor)
+            llBasketball.setBackgroundResource(if (selectedSport == getString(R.string.basketball)) selectedBg else unselectedBg)
+            tvBasketballLabel.setTextColor(if (selectedSport == getString(R.string.basketball)) selectedTextColor else unselectedTextColor)
 
-            llFootball.setBackgroundResource(if (selectedSport == "כדורגל") selectedBg else unselectedBg)
-            tvFootballLabel.setTextColor(if (selectedSport == "כדורגל") selectedTextColor else unselectedTextColor)
+            llFootball.setBackgroundResource(if (selectedSport == getString(R.string.football)) selectedBg else unselectedBg)
+            tvFootballLabel.setTextColor(if (selectedSport == getString(R.string.football)) selectedTextColor else unselectedTextColor)
 
-            llTennis.setBackgroundResource(if (selectedSport == "טניס") selectedBg else unselectedBg)
-            tvTennisLabel.setTextColor(if (selectedSport == "טניס") selectedTextColor else unselectedTextColor)
+            llTennis.setBackgroundResource(if (selectedSport == getString(R.string.tennis)) selectedBg else unselectedBg)
+            tvTennisLabel.setTextColor(if (selectedSport == getString(R.string.tennis)) selectedTextColor else unselectedTextColor)
         }
     }
 
@@ -153,6 +156,7 @@ class EditPostFragment : Fragment() {
                             binding.btnPostCourt.isEnabled = false
                         }
                         is EditPostViewModel.EditPostState.Success -> {
+                            binding.progressBar.visibility = View.GONE
                             Toast.makeText(requireContext(), "עודכן בהצלחה", Toast.LENGTH_SHORT).show()
                             findNavController().popBackStack()
                         }
