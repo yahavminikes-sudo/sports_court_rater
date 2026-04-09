@@ -24,6 +24,9 @@ interface CourtDao {
 
     @Delete
     suspend fun delete(court: Court)
+
+    @Query("DELETE FROM courts WHERE id = :id")
+    suspend fun deleteById(id: String)
     
     @Query("DELETE FROM courts")
     suspend fun deleteAll()

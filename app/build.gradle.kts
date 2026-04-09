@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("kotlin-parcelize")
     alias(libs.plugins.google.ksp)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.dagger.hilt)
@@ -62,6 +63,7 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage)
     implementation(libs.play.services.tasks)
+    implementation(libs.play.services.location)
     ksp("com.squareup:javapoet:1.13.0")
     implementation("com.squareup.picasso:picasso:2.71828")
 

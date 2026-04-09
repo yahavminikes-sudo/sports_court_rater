@@ -15,9 +15,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.example.sports_court_rater.Court
 import com.example.sports_court_rater.R
+import com.example.sports_court_rater.databinding.BottomSheetCourtOptionsBinding
 import com.example.sports_court_rater.databinding.FragmentProfileBinding
 import com.example.sports_court_rater.ui.home.CourtAdapter
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -161,10 +164,15 @@ class ProfileFragment : Fragment() {
     }
 
     private fun setupRecyclerViews() {
-        courtAdapter = CourtAdapter { courtId ->
-            val action = ProfileFragmentDirections.actionProfileFragmentToCourtInfoFragment(courtId)
-            findNavController().navigate(action)
-        }
+        courtAdapter = CourtAdapter(
+            onCourtClick = { courtId ->
+                val action = ProfileFragmentDirections.actionProfileFragmentToCourtInfoFragment(courtId)
+                findNavController().navigate(action)
+            },
+            onCourtLongClick = { court ->
+                showPostOptionsBottomSheet(court)
+            }
+        )
         
         reviewAdapter = ReviewAdapter { courtId ->
             val action = ProfileFragmentDirections.actionProfileFragmentToCourtInfoFragment(courtId)
@@ -172,6 +180,38 @@ class ProfileFragment : Fragment() {
         }
         
         binding.rvMyPosts.adapter = courtAdapter
+    }
+
+    private fun showPostOptionsBottomSheet(court: Court) {
+        val bottomSheet = BottomSheetDialog(requireContext(), R.style.CustomBottomSheetDialogTheme)
+        val binding = BottomSheetCourtOptionsBinding.inflate(layoutInflater)
+        bottomSheet.setContentView(binding.root)
+
+        binding.tvCourtName.text = court.courtName
+
+        binding.btnEdit.setOnClickListener {
+            bottomSheet.dismiss()
+            val action = ProfileFragmentDirections.actionProfileFragmentToEditPostFragment(court)
+            findNavController().navigate(action)
+        }
+
+        binding.btnDelete.setOnClickListener {
+            bottomSheet.dismiss()
+            showDeleteConfirmation(court)
+        }
+
+        bottomSheet.show()
+    }
+
+    private fun showDeleteConfirmation(court: Court) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("מחיקת מגרש")
+            .setMessage("האם אתה בטוח שברצונך למחוק את '${court.courtName}'?")
+            .setPositiveButton("מחק") { _, _ ->
+                viewModel.deleteCourt(court)
+            }
+            .setNegativeButton("ביטול", null)
+            .show()
     }
 
     private fun observeViewModel() {
@@ -211,6 +251,17 @@ class ProfileFragment : Fragment() {
                         }?.onFailure {
                             Toast.makeText(requireContext(), "עדכון השם נכשל: ${it.message}", Toast.LENGTH_SHORT).show()
                             viewModel.resetUpdateResult()
+                        }
+                    }
+                }
+                launch {
+                    viewModel.deleteResult.collect { result ->
+                        result?.onSuccess {
+                            Toast.makeText(requireContext(), "המגרש נמחק בהצלחה", Toast.LENGTH_SHORT).show()
+                            viewModel.resetDeleteResult()
+                        }?.onFailure {
+                            Toast.makeText(requireContext(), "המחיקה נכשלה: ${it.message}", Toast.LENGTH_SHORT).show()
+                            viewModel.resetDeleteResult()
                         }
                     }
                 }

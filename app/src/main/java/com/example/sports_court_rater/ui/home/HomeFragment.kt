@@ -41,10 +41,12 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        adapter = CourtAdapter { courtId ->
-            val action = HomeFragmentDirections.actionHomeFragmentToCourtInfoFragment(courtId)
-            findNavController().navigate(action)
-        }
+        adapter = CourtAdapter(
+            onCourtClick = { courtId ->
+                val action = HomeFragmentDirections.actionHomeFragmentToCourtInfoFragment(courtId)
+                findNavController().navigate(action)
+            }
+        )
         binding.rvCourts.adapter = adapter
     }
 

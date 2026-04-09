@@ -60,6 +60,9 @@
         <argument
             android:name="courtId"
             app:argType="string" />
+        <action
+            android:id="@+id/action_courtInfoFragment_to_editPostFragment"
+            app:destination="@id/editPostFragment" />
     </fragment>
 
     <fragment
@@ -67,6 +70,16 @@
         android:name="com.example.sports_court_rater.ui.addcourt.AddCourtFragment"
         android:label="AddCourtFragment"
         tools:layout="@layout/fragment_add_court" />
+
+    <fragment
+        android:id="@+id/editPostFragment"
+        android:name="com.example.sports_court_rater.ui.editpost.EditPostFragment"
+        android:label="EditPostFragment"
+        tools:layout="@layout/fragment_add_court">
+        <argument
+            android:name="court"
+            app:argType="com.example.sports_court_rater.Court" />
+    </fragment>
 
     <fragment
         android:id="@+id/searchFragment"
@@ -91,6 +104,9 @@
         <action
             android:id="@+id/action_profileFragment_to_courtInfoFragment"
             app:destination="@id/courtInfoFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_editPostFragment"
+            app:destination="@id/editPostFragment" />
     </fragment>
 
 </navigation>

@@ -41,6 +41,9 @@ class ProfileViewModel @Inject constructor(
     private val _updateResult = MutableStateFlow<Result<Unit>?>(null)
     val updateResult: StateFlow<Result<Unit>?> = _updateResult.asStateFlow()
 
+    private val _deleteResult = MutableStateFlow<Result<Unit>?>(null)
+    val deleteResult: StateFlow<Result<Unit>?> = _deleteResult.asStateFlow()
+
     init {
         loadUserData()
     }
@@ -109,8 +112,27 @@ class ProfileViewModel @Inject constructor(
         updateProfile(newName, null)
     }
 
+    fun deleteCourt(court: Court) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                repository.deleteCourt(court.id, court.imageUrl)
+                _deleteResult.value = Result.success(Unit)
+                loadUserData() // Refresh the list
+            } catch (e: Exception) {
+                _deleteResult.value = Result.failure(e)
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
     fun resetUpdateResult() {
         _updateResult.value = null
+    }
+
+    fun resetDeleteResult() {
+        _deleteResult.value = null
     }
 
     fun logout() {

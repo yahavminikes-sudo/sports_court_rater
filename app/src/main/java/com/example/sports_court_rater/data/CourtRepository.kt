@@ -1,19 +1,23 @@
 package com.example.sports_court_rater.data
 
+import android.net.Uri
 import com.example.sports_court_rater.Court
 import com.example.sports_court_rater.Review
 import com.example.sports_court_rater.data.local.CourtDao
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Source
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
+import java.util.UUID
 import javax.inject.Inject
 
 class CourtRepository @Inject constructor(
     private val courtDao: CourtDao,
     private val firestore: FirebaseFirestore,
-    private val remoteDataSource: CollectionReference
+    private val remoteDataSource: CollectionReference,
+    private val storage: FirebaseStorage
 ) {
 
     /**
@@ -30,7 +34,6 @@ class CourtRepository @Inject constructor(
             courtDao.deleteAll()
             courtDao.insertAll(courts)
         } catch (e: Exception) {
-            // In a real app, you'd want to propagate this error or log it
             e.printStackTrace()
         }
     }
@@ -70,6 +73,40 @@ class CourtRepository @Inject constructor(
             snapshot.toObjects(Review::class.java)
         } catch (e: Exception) {
             emptyList()
+        }
+    }
+
+    suspend fun uploadImage(uri: Uri): String {
+        val fileName = "court_images/${UUID.randomUUID()}.jpg"
+        val ref = storage.reference.child(fileName)
+        ref.putFile(uri).await()
+        return ref.downloadUrl.await().toString()
+    }
+
+    suspend fun saveCourt(court: Court) {
+        remoteDataSource.document(court.id).set(court).await()
+        courtDao.insert(court)
+    }
+
+    /**
+     * Deletes the court record from Firestore and Room, and removes the image from Storage.
+     */
+    suspend fun deleteCourt(courtId: String, imageUrl: String) {
+        // 1. Delete from Firestore
+        remoteDataSource.document(courtId).delete().await()
+        
+        // 2. Delete from Room
+        courtDao.deleteById(courtId)
+
+        // 3. Delete image from Firebase Storage if it exists
+        if (imageUrl.isNotEmpty()) {
+            try {
+                val storageRef = storage.getReferenceFromUrl(imageUrl)
+                storageRef.delete().await()
+            } catch (e: Exception) {
+                // If the image is already gone or link is invalid, we proceed
+                e.printStackTrace()
+            }
         }
     }
 }

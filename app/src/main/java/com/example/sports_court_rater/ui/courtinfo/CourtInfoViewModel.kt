@@ -7,6 +7,7 @@ import com.example.sports_court_rater.User
 import com.example.sports_court_rater.data.CourtRepository
 import com.example.sports_court_rater.data.remote.RetrofitInstance
 import com.example.sports_court_rater.data.remote.WeatherResponse
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class CourtInfoViewModel @Inject constructor(
     private val repository: CourtRepository,
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val auth: FirebaseAuth
 ) : ViewModel() {
 
     private val _court = MutableStateFlow<Court?>(null)
@@ -34,11 +36,18 @@ class CourtInfoViewModel @Inject constructor(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
+    private val _isCreator = MutableStateFlow(false)
+    val isCreator: StateFlow<Boolean> = _isCreator.asStateFlow()
+
+    private val _deleteResult = MutableStateFlow<Result<Unit>?>(null)
+    val deleteResult: StateFlow<Result<Unit>?> = _deleteResult.asStateFlow()
+
     fun loadCourtDetails(courtId: String) {
         viewModelScope.launch {
             val courtDetails = repository.getCourtById(courtId)
             if (courtDetails != null) {
                 _court.value = courtDetails
+                _isCreator.value = courtDetails.creatorId == auth.currentUser?.uid
                 fetchWeather(courtDetails.latitude, courtDetails.longitude)
                 fetchCreatorInfo(courtDetails.creatorId)
             } else {
@@ -73,5 +82,21 @@ class CourtInfoViewModel @Inject constructor(
                 e.printStackTrace()
             }
         }
+    }
+
+    fun deleteCourt() {
+        val currentCourt = _court.value ?: return
+        viewModelScope.launch {
+            try {
+                repository.deleteCourt(currentCourt.id, currentCourt.imageUrl)
+                _deleteResult.value = Result.success(Unit)
+            } catch (e: Exception) {
+                _deleteResult.value = Result.failure(e)
+            }
+        }
+    }
+
+    fun resetDeleteResult() {
+        _deleteResult.value = null
     }
 }
