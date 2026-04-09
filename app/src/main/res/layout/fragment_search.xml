@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:background="#F8F8F8"
     android:layoutDirection="rtl"
-    android:padding="16dp"
     tools:context=".ui.search.SearchFragment">
 
     <!-- Search Header -->
@@ -16,6 +15,7 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
+        android:layout_marginHorizontal="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -68,6 +68,7 @@
         android:id="@+id/cvFilters"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
         android:layout_marginTop="16dp"
         android:visibility="gone"
         app:cardCornerRadius="16dp"
@@ -130,6 +131,7 @@
         android:id="@+id/tvResultsCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:textColor="#2E7D32"
         android:textSize="14sp"
