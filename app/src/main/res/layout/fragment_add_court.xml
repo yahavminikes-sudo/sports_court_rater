@@ -326,7 +326,6 @@
                         style="@style/Widget.MaterialComponents.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
                         android:text="@string/use_current_location"
                         android:textColor="@color/primary_green"
                         android:textSize="12sp"
@@ -334,6 +333,40 @@
                         app:iconSize="16dp"
                         app:iconTint="@color/primary_green" />
 
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Rating Section -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:gravity="start"
+                        android:text="@string/rating_label_required"
+                        android:textColor="@color/black"
+                        android:textStyle="bold" />
+
+                    <RatingBar
+                        android:id="@+id/ratingBar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:numStars="5"
+                        android:progressTint="@color/rating_star"
+                        android:stepSize="0.5" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -373,39 +406,6 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Rating Section -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:text="@string/rating_label_required"
-                        android:textColor="@color/black"
-                        android:textStyle="bold" />
-
-                    <RatingBar
-                        android:id="@+id/ratingBar"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:numStars="5"
-                        android:progressTint="@color/rating_star"
-                        android:stepSize="0.5" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -427,8 +427,8 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_gravity="center"
-                    android:visibility="gone"
-                    android:indeterminateTint="@android:color/white" />
+                    android:indeterminateTint="@android:color/white"
+                    android:visibility="gone" />
             </FrameLayout>
 
         </LinearLayout>
