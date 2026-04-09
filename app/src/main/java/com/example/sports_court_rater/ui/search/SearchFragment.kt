@@ -21,7 +21,6 @@ import com.google.android.material.chip.Chip
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import androidx.core.view.isVisible
-import com.example.sports_court_rater.ui.home.HomeFragmentDirections
 
 @AndroidEntryPoint
 class SearchFragment : Fragment() {
@@ -66,7 +65,7 @@ class SearchFragment : Fragment() {
 
         binding.cgSports.setOnCheckedStateChangeListener { group, checkedIds ->
             val checkedChip = group.findViewById<Chip>(checkedIds.firstOrNull() ?: -1)
-            val sport = checkedChip?.tag?.toString() ?: "All"
+            val sport = checkedChip?.tag?.toString() ?: "all"
             viewModel.onSportSelected(sport)
         }
 
@@ -106,7 +105,7 @@ class SearchFragment : Fragment() {
         
         sports.forEach { sport ->
             val chip = Chip(requireContext()).apply {
-                text = if (sport == "All") getString(R.string.all_sports) else sport
+                text = if (sport == "all") getString(R.string.all_sports) else sport
                 tag = sport
                 isCheckable = true
                 isCheckedIconVisible = false

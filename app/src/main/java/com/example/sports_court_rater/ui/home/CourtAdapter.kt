@@ -35,9 +35,8 @@ class CourtAdapter(
                 tvCourtName.text = court.courtName
                 tvSportType.text = court.sportType
                 rbRating.rating = court.rating
-                // Assuming you might want to show actual address or coordinates
                 tvLocation.text = "${court.latitude}, ${court.longitude}" 
-                tvReviewCount.text = "" // Placeholder
+                tvReviewCount.text = ""
 
                 if (court.imageUrl.isNotEmpty()) {
                     Picasso.get()

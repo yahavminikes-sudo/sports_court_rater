@@ -169,11 +169,12 @@
                             android:gravity="center"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/ivBasketballIcon"
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:src="@drawable/ic_basketball" />
+                            <TextView
+                                android:id="@+id/tvBasketballIcon"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="🏀"
+                                android:textSize="32sp" />
 
                             <TextView
                                 android:id="@+id/tvBasketballLabel"
@@ -198,11 +199,12 @@
                             android:gravity="center"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/ivFootballIcon"
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:src="@drawable/ic_soccer" />
+                            <TextView
+                                android:id="@+id/tvFootballIcon"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="⚽"
+                                android:textSize="32sp" />
 
                             <TextView
                                 android:id="@+id/tvFootballLabel"
@@ -227,11 +229,12 @@
                             android:gravity="center"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/ivTennisIcon"
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:src="@drawable/ic_tennis" />
+                            <TextView
+                                android:id="@+id/tvTennisIcon"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="🎾"
+                                android:textSize="32sp" />
 
                             <TextView
                                 android:id="@+id/tvTennisLabel"
@@ -353,7 +356,7 @@
                         android:layout_marginTop="8dp"
                         android:numStars="5"
                         android:progressTint="@color/rating_star"
-                        android:stepSize="1.0" />
+                        android:stepSize="0.5" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 

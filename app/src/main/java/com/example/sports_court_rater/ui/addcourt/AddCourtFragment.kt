@@ -80,13 +80,13 @@ class AddCourtFragment : Fragment() {
         }
 
         binding.llBasketball.setOnClickListener {
-            viewModel.setSport("basketball")
+            viewModel.setSport("כדורסל")
         }
         binding.llFootball.setOnClickListener {
-            viewModel.setSport("football")
+            viewModel.setSport("כדורגל")
         }
         binding.llTennis.setOnClickListener {
-            viewModel.setSport("tennis")
+            viewModel.setSport("טניס")
         }
 
         binding.btnSelectImage.setOnClickListener {
@@ -207,32 +207,26 @@ class AddCourtFragment : Fragment() {
         // Reset all
         binding.llBasketball.setBackgroundResource(unselectedBg)
         binding.tvBasketballLabel.setTextColor(unselectedTextColor)
-        binding.ivBasketballIcon.setColorFilter(unselectedTextColor)
 
         binding.llFootball.setBackgroundResource(unselectedBg)
         binding.tvFootballLabel.setTextColor(unselectedTextColor)
-        binding.ivFootballIcon.setColorFilter(unselectedTextColor)
 
         binding.llTennis.setBackgroundResource(unselectedBg)
         binding.tvTennisLabel.setTextColor(unselectedTextColor)
-        binding.ivTennisIcon.setColorFilter(unselectedTextColor)
 
         // Apply selected
         when (selectedSport) {
-            "basketball" -> {
+            "כדורסל" -> {
                 binding.llBasketball.setBackgroundResource(selectedBg)
                 binding.tvBasketballLabel.setTextColor(selectedTextColor)
-                binding.ivBasketballIcon.setColorFilter(selectedTextColor)
             }
-            "football" -> {
+            "כדורגל" -> {
                 binding.llFootball.setBackgroundResource(selectedBg)
                 binding.tvFootballLabel.setTextColor(selectedTextColor)
-                binding.ivFootballIcon.setColorFilter(selectedTextColor)
             }
-            "tennis" -> {
+            "טניס" -> {
                 binding.llTennis.setBackgroundResource(selectedBg)
                 binding.tvTennisLabel.setTextColor(selectedTextColor)
-                binding.ivTennisIcon.setColorFilter(selectedTextColor)
             }
         }
     }
