@@ -14,6 +14,20 @@
     <string name="add_court_image_url_hint">קישור לתמונה</string>
     <string name="add_court_save_button">שמור מגרש</string>
 
+    <!-- New Add Court UI -->
+    <string name="add_new_court_header">הוסף מגרש חדש</string>
+    <string name="court_photos_label">תמונות המגרש</string>
+    <string name="add_photo_label">הוסף תמונה</string>
+    <string name="court_name_label_required">שם המגרש *</string>
+    <string name="court_name_example">לדוגמה: מגרש כדורסל פארק הירקון</string>
+    <string name="sport_type_label_required">סוג ספורט *</string>
+    <string name="location_label_required">מיקום *</string>
+    <string name="location_hint">הזן כתובת או לחץ לאיתור GPS</string>
+    <string name="use_current_location">השתמש במיקום הנוכחי</string>
+    <string name="rating_label_required">דירוג *</string>
+    <string name="description_hint_detailed">ספר על מצב המגרש, תאורה, ציוד...</string>
+    <string name="post_court_button">פרסם מגרש</string>
+
     <!-- Item Court -->
     <string name="court_location_placeholder">רמת אביב, תל אביב</string>
     <string name="court_name_placeholder">מגרש כדורגל</string>
@@ -71,4 +85,7 @@
     <string name="profile_ratings_count_label">דירוגים</string>
     <string name="profile_empty_courts">עדיין לא פרסמת מגרשים</string>
     <string name="profile_logout_desc">התנתקות</string>
+
+    <!-- Court Published Success Message -->
+    <string name="court_published_success">המגרש פורסם בהצלחה!</string>
 </resources>

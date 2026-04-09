@@ -1,9 +1,12 @@
 package com.example.sports_court_rater
 
+import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.parcelize.Parcelize
 import java.util.UUID
 
+@Parcelize
 @Entity(tableName = "courts")
 data class Court(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
@@ -15,4 +18,4 @@ data class Court(
     val imageUrl: String = "",
     val rating: Float = 0f,
     val description: String = ""
-)
+) : Parcelable

@@ -1,10 +1,12 @@
 package com.example.sports_court_rater.ui.courtinfo
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -44,9 +46,31 @@ class CourtInfoFragment : Fragment() {
             findNavController().navigateUp()
         }
 
+        binding.btnEdit.setOnClickListener {
+            viewModel.court.value?.let { court ->
+                val action = CourtInfoFragmentDirections.actionCourtInfoFragmentToEditPostFragment(court)
+                findNavController().navigate(action)
+            }
+        }
+
+        binding.btnDelete.setOnClickListener {
+            showDeleteConfirmation()
+        }
+
         viewModel.loadCourtDetails(args.courtId)
 
         observeViewModel()
+    }
+
+    private fun showDeleteConfirmation() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("מחיקת מגרש")
+            .setMessage("האם אתה בטוח שברצונך למחוק את המגרש?")
+            .setPositiveButton("מחק") { _, _ ->
+                viewModel.deleteCourt()
+            }
+            .setNegativeButton("ביטול", null)
+            .show()
     }
 
     private fun observeViewModel() {
@@ -68,6 +92,25 @@ class CourtInfoFragment : Fragment() {
                                     .placeholder(R.drawable.ic_launcher_background)
                                     .into(binding.ivCourtImage)
                             }
+                        }
+                    }
+                }
+
+                launch {
+                    viewModel.isCreator.collect { isCreator ->
+                        binding.btnEdit.isVisible = isCreator
+                        binding.btnDelete.isVisible = isCreator
+                    }
+                }
+
+                launch {
+                    viewModel.deleteResult.collect { result ->
+                        result?.onSuccess {
+                            Toast.makeText(requireContext(), "המגרש נמחק בהצלחה", Toast.LENGTH_SHORT).show()
+                            findNavController().navigateUp()
+                        }?.onFailure {
+                            Toast.makeText(requireContext(), "המחיקה נכשלה: ${it.message}", Toast.LENGTH_SHORT).show()
+                            viewModel.resetDeleteResult()
                         }
                     }
                 }

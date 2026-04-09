@@ -9,8 +9,10 @@ import com.example.sports_court_rater.Court
 import com.example.sports_court_rater.databinding.ItemCourtBinding
 import com.squareup.picasso.Picasso
 
-class CourtAdapter(private val onCourtClick: (String) -> Unit) :
-    ListAdapter<Court, CourtAdapter.CourtViewHolder>(CourtDiffCallback()) {
+class CourtAdapter(
+    private val onCourtClick: (String) -> Unit,
+    private val onCourtLongClick: ((Court) -> Unit)? = null
+) : ListAdapter<Court, CourtAdapter.CourtViewHolder>(CourtDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CourtViewHolder {
         val binding = ItemCourtBinding.inflate(
@@ -34,8 +36,8 @@ class CourtAdapter(private val onCourtClick: (String) -> Unit) :
                 tvSportType.text = court.sportType
                 rbRating.rating = court.rating
                 // Assuming you might want to show actual address or coordinates
-                tvLocation.text = "רמת אביב, תל אביב" 
-                tvReviewCount.text = "(12)" // Placeholder as per image
+                tvLocation.text = "${court.latitude}, ${court.longitude}" 
+                tvReviewCount.text = "" // Placeholder
 
                 if (court.imageUrl.isNotEmpty()) {
                     Picasso.get()
@@ -49,6 +51,11 @@ class CourtAdapter(private val onCourtClick: (String) -> Unit) :
 
                 root.setOnClickListener {
                     onCourtClick(court.id)
+                }
+
+                root.setOnLongClickListener {
+                    onCourtLongClick?.invoke(court)
+                    true
                 }
             }
         }

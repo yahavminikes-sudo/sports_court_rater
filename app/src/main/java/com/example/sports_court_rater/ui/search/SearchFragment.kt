@@ -21,6 +21,7 @@ import com.google.android.material.chip.Chip
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import androidx.core.view.isVisible
+import com.example.sports_court_rater.ui.home.HomeFragmentDirections
 
 @AndroidEntryPoint
 class SearchFragment : Fragment() {
@@ -49,10 +50,12 @@ class SearchFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        adapter = CourtAdapter { courtId ->
-            val action = SearchFragmentDirections.actionSearchFragmentToCourtInfoFragment(courtId)
-            findNavController().navigate(directions = action)
-        }
+        adapter = CourtAdapter(
+            onCourtClick = { courtId ->
+                val action = SearchFragmentDirections.actionSearchFragmentToCourtInfoFragment(courtId)
+                findNavController().navigate(directions = action)
+            }
+        )
         binding.rvResults.adapter = adapter
     }
 
