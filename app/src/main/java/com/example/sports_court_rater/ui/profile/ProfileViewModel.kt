@@ -63,6 +63,12 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    fun fetchLocationName(court: Court) {
+        viewModelScope.launch {
+            repository.fetchAndSaveLocationName(court)
+        }
+    }
+
     /**
      * Updates the user profile with a new name and/or a new profile photo.
      */

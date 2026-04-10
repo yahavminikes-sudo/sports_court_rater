@@ -82,15 +82,19 @@ class CourtInfoFragment : Fragment() {
                             binding.tvCourtName.text = it.courtName
                             binding.tvSportType.text = it.sportType
                             binding.tvDescription.text = it.description
-                            binding.tvLocationValue.text = getString(R.string.court_location_placeholder)
+                            binding.tvLocationValue.text = it.locationName.ifEmpty { 
+                                getString(R.string.court_location_placeholder) 
+                            }
                             binding.tvRatingScore.text = String.format(Locale.getDefault(), "%.1f", it.rating)
                             binding.ratingBar.rating = it.rating
                             
                             if (it.imageUrl.isNotEmpty()) {
                                 Picasso.get()
                                     .load(it.imageUrl)
-                                    .placeholder(R.drawable.ic_launcher_background)
+                                    .placeholder(android.R.drawable.ic_menu_gallery)
                                     .into(binding.ivCourtImage)
+                            } else {
+                                binding.ivCourtImage.setImageResource(android.R.drawable.ic_menu_gallery)
                             }
                         }
                     }
@@ -127,7 +131,7 @@ class CourtInfoFragment : Fragment() {
                                 temp,
                                 description
                             )
-                            
+
                             if (iconCode != null) {
                                 val iconUrl = "https://openweathermap.org/img/wn/$iconCode@2x.png"
                                 Picasso.get().load(iconUrl).into(binding.ivWeatherIcon)

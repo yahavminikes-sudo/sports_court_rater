@@ -7,6 +7,7 @@ import com.example.sports_court_rater.User
 import com.example.sports_court_rater.data.CourtRepository
 import com.example.sports_court_rater.data.remote.RetrofitInstance
 import com.example.sports_court_rater.data.remote.WeatherResponse
+import com.example.sports_court_rater.utils.LocationHelper
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +22,8 @@ import javax.inject.Inject
 class CourtInfoViewModel @Inject constructor(
     private val repository: CourtRepository,
     private val firestore: FirebaseFirestore,
-    private val auth: FirebaseAuth
+    private val auth: FirebaseAuth,
+    private val locationHelper: LocationHelper
 ) : ViewModel() {
 
     private val _court = MutableStateFlow<Court?>(null)
@@ -47,6 +49,13 @@ class CourtInfoViewModel @Inject constructor(
             val courtDetails = repository.getCourtById(courtId)
             if (courtDetails != null) {
                 _court.value = courtDetails
+                if (courtDetails.locationName.isEmpty()) {
+                    val name = repository.fetchAndSaveLocationName(courtDetails)
+                    if (name != null) {
+                        _court.value = courtDetails.copy(locationName = name)
+                    }
+                }
+
                 _isCreator.value = courtDetails.creatorId == auth.currentUser?.uid
                 fetchWeather(courtDetails.latitude, courtDetails.longitude)
                 fetchCreatorInfo(courtDetails.creatorId)

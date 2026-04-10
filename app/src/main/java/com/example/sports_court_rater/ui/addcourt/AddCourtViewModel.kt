@@ -8,6 +8,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.sports_court_rater.AuthRepository
 import com.example.sports_court_rater.Court
 import com.example.sports_court_rater.data.CourtRepository
+import com.example.sports_court_rater.utils.LocationHelper
+import com.example.sports_court_rater.utils.LocationResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,16 +21,17 @@ import javax.inject.Inject
 @HiltViewModel
 class AddCourtViewModel @Inject constructor(
     private val courtRepository: CourtRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val locationHelper: LocationHelper
 ) : ViewModel() {
 
     private val _latitude = MutableLiveData<Double?>()
-    val latitude: LiveData<Double?> = _latitude
-
     private val _longitude = MutableLiveData<Double?>()
-    val longitude: LiveData<Double?> = _longitude
 
-    private val _selectedSport = MutableLiveData<String>("basketball")
+    private val _locationName = MutableLiveData<String?>()
+    val locationName: LiveData<String?> = _locationName
+
+    private val _selectedSport = MutableLiveData<String>("כדורסל")
     val selectedSport: LiveData<String> = _selectedSport
 
     private val _imageUri = MutableLiveData<Uri?>()
@@ -47,6 +50,21 @@ class AddCourtViewModel @Inject constructor(
     fun setLocation(lat: Double, lng: Double) {
         _latitude.value = lat
         _longitude.value = lng
+        fetchLocationName(lat, lng)
+    }
+
+    private fun fetchLocationName(lat: Double, lng: Double) {
+        viewModelScope.launch {
+            val result = locationHelper.reverseGeocode(lat, lng)
+            if (result != null) {
+                val name = buildString {
+                    result.neighborhood?.let { append(it) }
+                    if (result.neighborhood != null && result.city != null) append(", ")
+                    result.city?.let { append(it) }
+                }
+                _locationName.value = if (name.isNotEmpty()) name else null
+            }
+        }
     }
 
     fun setSport(sport: String) {
@@ -57,14 +75,11 @@ class AddCourtViewModel @Inject constructor(
         _imageUri.value = uri
     }
 
-    /**
-     * Publishes a new court post by uploading the image (if present),
-     * constructing the Court object, and saving it to Firebase.
-     */
     fun postCourt(name: String, description: String, rating: Float) {
         val lat = _latitude.value
         val lng = _longitude.value
-        val sport = _selectedSport.value ?: "basketball"
+        val locationName = _locationName.value ?: ""
+        val sport = _selectedSport.value ?: "כדורסל"
         val uri = _imageUri.value
 
         if (lat == null || lng == null) {
@@ -75,20 +90,19 @@ class AddCourtViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = AddCourtState.Loading
             try {
-                // 1. Upload Image and retrieve download URL (Suspend function in Repository)
                 val imageUrl = if (uri != null) {
                     courtRepository.uploadImage(uri)
                 } else {
                     ""
                 }
 
-                // 2. Construct Court object (using UUID for ID)
                 val creatorId = authRepository.getCurrentUser()?.uid ?: ""
                 val court = Court(
                     id = UUID.randomUUID().toString(),
                     creatorId = creatorId,
                     courtName = name,
                     sportType = sport,
+                    locationName = locationName,
                     latitude = lat,
                     longitude = lng,
                     imageUrl = imageUrl,
@@ -96,10 +110,7 @@ class AddCourtViewModel @Inject constructor(
                     description = description
                 )
 
-                // 3. Save this new Court object to the remote Firebase database
                 courtRepository.saveCourt(court)
-
-                // 4. Notify UI via StateFlow when finished
                 _uiState.value = AddCourtState.Success
             } catch (e: Exception) {
                 _uiState.value = AddCourtState.Error(e.message ?: "An unexpected error occurred.")

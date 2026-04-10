@@ -21,7 +21,6 @@ import com.google.android.material.chip.Chip
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import androidx.core.view.isVisible
-import com.example.sports_court_rater.ui.home.HomeFragmentDirections
 
 @AndroidEntryPoint
 class SearchFragment : Fragment() {
@@ -54,6 +53,9 @@ class SearchFragment : Fragment() {
             onCourtClick = { courtId ->
                 val action = SearchFragmentDirections.actionSearchFragmentToCourtInfoFragment(courtId)
                 findNavController().navigate(directions = action)
+            },
+            onLocationNeeded = { court ->
+                viewModel.fetchLocationName(court)
             }
         )
         binding.rvResults.adapter = adapter

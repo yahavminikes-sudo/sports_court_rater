@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:background="#F8F8F8"
     android:layoutDirection="rtl"
+    android:paddingTop="16dp"
     tools:context=".ui.search.SearchFragment">
 
     <!-- Search Header -->

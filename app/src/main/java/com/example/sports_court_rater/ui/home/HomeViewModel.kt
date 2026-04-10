@@ -18,7 +18,6 @@ class HomeViewModel @Inject constructor(
     private val repository: CourtRepository
 ) : ViewModel() {
 
-    // StateFlow that collects from the repository's Flow
     val courts: StateFlow<List<Court>> = repository.getAllCourts()
         .stateIn(
             scope = viewModelScope,
@@ -30,7 +29,6 @@ class HomeViewModel @Inject constructor(
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     init {
-        // Optionally refresh data when ViewModel is first created
         refreshCourts()
     }
 
@@ -40,10 +38,16 @@ class HomeViewModel @Inject constructor(
             try {
                 repository.refreshCourts()
             } catch (e: Exception) {
-                // Handle error if needed
+                e.printStackTrace()
             } finally {
                 _isLoading.value = false
             }
+        }
+    }
+
+    fun fetchLocationName(court: Court) {
+        viewModelScope.launch {
+            repository.fetchAndSaveLocationName(court)
         }
     }
 }

@@ -45,6 +45,9 @@ class HomeFragment : Fragment() {
             onCourtClick = { courtId ->
                 val action = HomeFragmentDirections.actionHomeFragmentToCourtInfoFragment(courtId)
                 findNavController().navigate(action)
+            },
+            onLocationNeeded = { court ->
+                viewModel.fetchLocationName(court)
             }
         )
         binding.rvCourts.adapter = adapter

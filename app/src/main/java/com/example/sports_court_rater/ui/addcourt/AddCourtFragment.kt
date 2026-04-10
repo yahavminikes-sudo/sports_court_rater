@@ -80,13 +80,13 @@ class AddCourtFragment : Fragment() {
         }
 
         binding.llBasketball.setOnClickListener {
-            viewModel.setSport("basketball")
+            viewModel.setSport(getString(R.string.basketball))
         }
         binding.llFootball.setOnClickListener {
-            viewModel.setSport("football")
+            viewModel.setSport(getString(R.string.football))
         }
         binding.llTennis.setOnClickListener {
-            viewModel.setSport("tennis")
+            viewModel.setSport(getString(R.string.tennis))
         }
 
         binding.btnSelectImage.setOnClickListener {
@@ -145,8 +145,12 @@ class AddCourtFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        viewModel.latitude.observe(viewLifecycleOwner) { updateLocationText() }
-        viewModel.longitude.observe(viewLifecycleOwner) { updateLocationText() }
+        viewModel.locationName.observe(viewLifecycleOwner) { name ->
+            if (name != null) {
+                binding.etLocation.setText(name)
+            }
+        }
+        
         viewModel.selectedSport.observe(viewLifecycleOwner) { sport ->
             updateSportSelectionUI(sport)
         }
@@ -219,29 +223,21 @@ class AddCourtFragment : Fragment() {
 
         // Apply selected
         when (selectedSport) {
-            "basketball" -> {
+            getString(R.string.basketball) -> {
                 binding.llBasketball.setBackgroundResource(selectedBg)
                 binding.tvBasketballLabel.setTextColor(selectedTextColor)
                 binding.ivBasketballIcon.setColorFilter(selectedTextColor)
             }
-            "football" -> {
+            getString(R.string.football) -> {
                 binding.llFootball.setBackgroundResource(selectedBg)
                 binding.tvFootballLabel.setTextColor(selectedTextColor)
                 binding.ivFootballIcon.setColorFilter(selectedTextColor)
             }
-            "tennis" -> {
+            getString(R.string.tennis) -> {
                 binding.llTennis.setBackgroundResource(selectedBg)
                 binding.tvTennisLabel.setTextColor(selectedTextColor)
                 binding.ivTennisIcon.setColorFilter(selectedTextColor)
             }
-        }
-    }
-
-    private fun updateLocationText() {
-        val lat = viewModel.latitude.value
-        val lng = viewModel.longitude.value
-        if (lat != null && lng != null) {
-            binding.etLocation.setText("$lat, $lng")
         }
     }
 

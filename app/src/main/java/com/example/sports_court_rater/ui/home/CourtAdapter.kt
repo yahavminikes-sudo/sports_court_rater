@@ -1,17 +1,20 @@
 package com.example.sports_court_rater.ui.home
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sports_court_rater.Court
+import com.example.sports_court_rater.R
 import com.example.sports_court_rater.databinding.ItemCourtBinding
 import com.squareup.picasso.Picasso
 
 class CourtAdapter(
     private val onCourtClick: (String) -> Unit,
-    private val onCourtLongClick: ((Court) -> Unit)? = null
+    private val onCourtLongClick: ((Court) -> Unit)? = null,
+    private val onLocationNeeded: ((Court) -> Unit)? = null
 ) : ListAdapter<Court, CourtAdapter.CourtViewHolder>(CourtDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CourtViewHolder {
@@ -35,11 +38,16 @@ class CourtAdapter(
                 tvCourtName.text = court.courtName
                 tvSportType.text = court.sportType
                 rbRating.rating = court.rating
-                // Assuming you might want to show actual address or coordinates
-                tvLocation.text = "${court.latitude}, ${court.longitude}" 
-                tvReviewCount.text = "" // Placeholder
+
+                tvLocation.text = court.locationName.ifEmpty {
+                    onLocationNeeded?.invoke(court)
+                    root.context.getString(R.string.court_location_placeholder)
+                }
+
+                tvReviewCount.text = ""
 
                 if (court.imageUrl.isNotEmpty()) {
+                    ivCourtImage.visibility = View.VISIBLE
                     Picasso.get()
                         .load(court.imageUrl)
                         .placeholder(android.R.drawable.ic_menu_gallery)
@@ -47,6 +55,7 @@ class CourtAdapter(
                         .into(ivCourtImage)
                 } else {
                     ivCourtImage.setImageResource(android.R.drawable.ic_menu_gallery)
+                    ivCourtImage.visibility = View.VISIBLE
                 }
 
                 root.setOnClickListener {

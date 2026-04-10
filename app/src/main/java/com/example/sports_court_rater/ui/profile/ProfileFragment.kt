@@ -181,6 +181,9 @@ class ProfileFragment : Fragment() {
             },
             onCourtLongClick = { court ->
                 showPostOptionsBottomSheet(court)
+            },
+            onLocationNeeded = { court ->
+                viewModel.fetchLocationName(court)
             }
         )
         

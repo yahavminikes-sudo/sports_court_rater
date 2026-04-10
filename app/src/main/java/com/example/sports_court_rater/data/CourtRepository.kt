@@ -4,6 +4,7 @@ import android.net.Uri
 import com.example.sports_court_rater.Court
 import com.example.sports_court_rater.Review
 import com.example.sports_court_rater.data.local.CourtDao
+import com.example.sports_court_rater.utils.LocationHelper
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Source
@@ -12,13 +13,17 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class CourtRepository @Inject constructor(
     private val courtDao: CourtDao,
     private val firestore: FirebaseFirestore,
     private val remoteDataSource: CollectionReference,
-    private val storage: FirebaseStorage
+    private val storage: FirebaseStorage,
+    private val locationHelper: LocationHelper
 ) {
+    private val fetchingIds = mutableSetOf<String>()
 
     /**
      * Fetches the latest list of Court from Firebase (forcing server fetch)
@@ -29,7 +34,7 @@ class CourtRepository @Inject constructor(
             // Force fetch from server to bypass Firebase's internal cache
             val snapshot = remoteDataSource.get(Source.SERVER).await()
             val courts = snapshot.toObjects(Court::class.java)
-            
+
             // Single source of truth: Update Room
             courtDao.deleteAll()
             courtDao.insertAll(courts)
@@ -88,13 +93,34 @@ class CourtRepository @Inject constructor(
         courtDao.insert(court)
     }
 
+    suspend fun fetchAndSaveLocationName(court: Court): String? {
+        if (court.locationName.isNotEmpty() || fetchingIds.contains(court.id)) return court.locationName
+
+        fetchingIds.add(court.id)
+        try {
+            val result = locationHelper.reverseGeocode(court.latitude, court.longitude)
+            val name = result?.let {
+                listOfNotNull(it.neighborhood, it.city).joinToString(", ")
+            }
+            if (!name.isNullOrEmpty()) {
+                val updatedCourt = court.copy(locationName = name)
+                // Save ONLY to local DAO to avoid Firestore storage
+                courtDao.insert(updatedCourt)
+                return name
+            }
+        } finally {
+            fetchingIds.remove(court.id)
+        }
+        return null
+    }
+
     /**
      * Deletes the court record from Firestore and Room, and removes the image from Storage.
      */
     suspend fun deleteCourt(courtId: String, imageUrl: String) {
         // 1. Delete from Firestore
         remoteDataSource.document(courtId).delete().await()
-        
+
         // 2. Delete from Room
         courtDao.deleteById(courtId)
 

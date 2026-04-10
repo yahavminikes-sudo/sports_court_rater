@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -67,5 +68,11 @@ class SearchViewModel @Inject constructor(
 
     fun onMinimumRatingChanged(rating: Float) {
         _minimumRating.value = rating
+    }
+
+    fun fetchLocationName(court: Court) {
+        viewModelScope.launch {
+            repository.fetchAndSaveLocationName(court)
+        }
     }
 }
