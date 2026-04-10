@@ -3,13 +3,16 @@ package com.example.sports_court_rater
 import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.google.firebase.firestore.DocumentId
 import kotlinx.parcelize.Parcelize
 import java.util.UUID
 
 @Parcelize
 @Entity(tableName = "courts")
 data class Court(
-    @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    @DocumentId
+    @PrimaryKey 
+    val id: String = UUID.randomUUID().toString(),
     val creatorId: String = "",
     val courtName: String = "",
     val sportType: String = "",

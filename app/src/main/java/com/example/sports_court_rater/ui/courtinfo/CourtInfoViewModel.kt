@@ -3,6 +3,7 @@ package com.example.sports_court_rater.ui.courtinfo
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sports_court_rater.Court
+import com.example.sports_court_rater.Review
 import com.example.sports_court_rater.User
 import com.example.sports_court_rater.data.CourtRepository
 import com.example.sports_court_rater.data.remote.RetrofitInstance
@@ -15,6 +16,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -33,6 +37,9 @@ class CourtInfoViewModel @Inject constructor(
     private val _creator = MutableStateFlow<User?>(null)
     val creator: StateFlow<User?> = _creator.asStateFlow()
 
+    private val _reviews = MutableStateFlow<List<Review>>(emptyList())
+    val reviews: StateFlow<List<Review>> = _reviews.asStateFlow()
+
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
@@ -50,6 +57,7 @@ class CourtInfoViewModel @Inject constructor(
                 _isCreator.value = courtDetails.creatorId == auth.currentUser?.uid
                 fetchWeather(courtDetails.latitude, courtDetails.longitude)
                 fetchCreatorInfo(courtDetails.creatorId)
+                fetchReviews(courtId)
             } else {
                 _error.value = "Court not found"
             }
@@ -80,6 +88,75 @@ class CourtInfoViewModel @Inject constructor(
                 _creator.value = user
             } catch (e: Exception) {
                 e.printStackTrace()
+            }
+        }
+    }
+
+    private fun fetchReviews(courtId: String) {
+        viewModelScope.launch {
+            try {
+                val reviewsList = repository.getReviewsByCourtId(courtId)
+                _reviews.value = reviewsList.sortedByDescending { it.date }
+            } catch (e: Exception) {
+                _error.value = "Failed to fetch reviews: ${e.message}"
+            }
+        }
+    }
+
+    fun addReview(rating: Float, comment: String) {
+        val currentCourt = _court.value ?: return
+        val currentUser = auth.currentUser ?: return
+        
+        viewModelScope.launch {
+            try {
+                val userSnapshot = firestore.collection("users").document(currentUser.uid).get().await()
+                val userData = userSnapshot.toObject(User::class.java)
+                
+                val review = Review(
+                    courtId = currentCourt.id,
+                    creatorId = currentUser.uid,
+                    creatorName = userData?.displayName ?: "User",
+                    creatorImageUrl = userData?.profilePictureUrl ?: "",
+                    rating = rating,
+                    comment = comment,
+                    date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()),
+                    courtName = currentCourt.courtName
+                )
+                repository.saveReview(review)
+                loadCourtDetails(currentCourt.id)
+            } catch (e: Exception) {
+                _error.value = "Failed to add review: ${e.message}"
+            }
+        }
+    }
+
+    fun updateReview(reviewId: String, rating: Float, comment: String) {
+        val currentCourt = _court.value ?: return
+        viewModelScope.launch {
+            try {
+                val reviewSnapshot = firestore.collection("reviews").document(reviewId).get().await()
+                val existingReview = reviewSnapshot.toObject(Review::class.java) ?: return@launch
+                
+                val updatedReview = existingReview.copy(
+                    rating = rating,
+                    comment = comment
+                )
+                repository.saveReview(updatedReview)
+                loadCourtDetails(currentCourt.id)
+            } catch (e: Exception) {
+                _error.value = "Failed to update review: ${e.message}"
+            }
+        }
+    }
+
+    fun deleteReview(review: Review) {
+        val currentCourt = _court.value ?: return
+        viewModelScope.launch {
+            try {
+                repository.deleteReview(review)
+                loadCourtDetails(currentCourt.id)
+            } catch (e: Exception) {
+                _error.value = "Failed to delete review: ${e.message}"
             }
         }
     }

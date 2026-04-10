@@ -22,6 +22,9 @@ interface CourtDao {
     @Query("SELECT * FROM courts WHERE id = :id")
     suspend fun getById(id: String): Court?
 
+    @Query("SELECT * FROM courts WHERE creatorId = :creatorId")
+    suspend fun getByCreatorId(creatorId: String): List<Court>
+
     @Delete
     suspend fun delete(court: Court)
 

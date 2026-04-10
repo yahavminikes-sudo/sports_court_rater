@@ -5,6 +5,9 @@
     <!-- Home Screen -->
     <string name="home_header_title">מגרש מנצח</string>
     <string name="home_header_subtitle">מצא את המגרש המושלם לך</string>
+    <string name="sort_rating">דירוג</string>
+    <string name="sort_new">חדש</string>
+    <string name="sort_near">קרוב</string>
 
     <!-- Add Court Screen -->
     <string name="add_court_title">הוספת מגרש חדש</string>
@@ -48,6 +51,12 @@
     <string name="location_icon_desc">סמל מיקום</string>
     <string name="creator_image_desc">תמונת המפרסם</string>
     <string name="reviews_icon_desc">סמל דירוגים</string>
+    <string name="add_review_button">הוסף דירוג</string>
+    <string name="add_review_dialog_title">הוספת דירוג</string>
+    <string name="add_review_comment_hint">כתוב את דעתך על המגרש...</string>
+    <string name="add_review_save_button">עדכן דירוג</string>
+    <string name="cancel_button">ביטול</string>
+    <string name="submit_button">שלח</string>
 
     <!-- Search Screen -->
     <string name="search_hint">חפש מגרש…</string>
