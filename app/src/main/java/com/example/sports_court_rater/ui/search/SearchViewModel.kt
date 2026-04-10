@@ -22,7 +22,7 @@ class SearchViewModel @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
 
-    private val _selectedSport = MutableStateFlow("All")
+    private val _selectedSport = MutableStateFlow("all")
     val selectedSport: StateFlow<String> = _selectedSport
 
     private val _minimumRating = MutableStateFlow(0f)
@@ -30,13 +30,13 @@ class SearchViewModel @Inject constructor(
 
     val availableSports: StateFlow<List<String>> = repository.getAllCourts()
         .map { courts ->
-            val sports = courts.map { it.sportType }.distinct().sorted()
-            listOf("All") + sports
+            val sports = courts.map { it.sportType }.distinct().filter { it.isNotEmpty() }.sorted()
+            listOf("all") + sports
         }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = listOf("All")
+            initialValue = listOf("all")
         )
 
     val filteredCourts: StateFlow<List<Court>> = combine(
@@ -47,7 +47,7 @@ class SearchViewModel @Inject constructor(
     ) { courts, query, sport, minRating ->
         courts.filter { court ->
             val matchesQuery = court.courtName.contains(query, ignoreCase = true)
-            val matchesSport = sport == "All" || court.sportType.equals(sport, ignoreCase = true)
+            val matchesSport = sport == "all" || court.sportType == sport
             val matchesRating = court.rating >= minRating
 
             matchesQuery && matchesSport && matchesRating

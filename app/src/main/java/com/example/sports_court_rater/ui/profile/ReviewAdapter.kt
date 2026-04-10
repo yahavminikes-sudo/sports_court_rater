@@ -8,8 +8,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.sports_court_rater.Review
 import com.example.sports_court_rater.databinding.ItemReviewBinding
 
-class ReviewAdapter(private val onReviewClick: (String) -> Unit) :
-    ListAdapter<Review, ReviewAdapter.ReviewViewHolder>(ReviewDiffCallback()) {
+class ReviewAdapter(
+    private val onReviewClick: (String) -> Unit,
+    private val onReviewLongClick: (Review) -> Unit
+) : ListAdapter<Review, ReviewAdapter.ReviewViewHolder>(ReviewDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReviewViewHolder {
         val binding = ItemReviewBinding.inflate(
@@ -36,6 +38,11 @@ class ReviewAdapter(private val onReviewClick: (String) -> Unit) :
 
                 root.setOnClickListener {
                     onReviewClick(review.courtId)
+                }
+
+                root.setOnLongClickListener {
+                    onReviewLongClick(review)
+                    true
                 }
             }
         }

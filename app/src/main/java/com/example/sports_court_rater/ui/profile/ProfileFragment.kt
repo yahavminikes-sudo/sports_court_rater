@@ -18,7 +18,10 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.sports_court_rater.Court
 import com.example.sports_court_rater.R
+import com.example.sports_court_rater.Review
 import com.example.sports_court_rater.databinding.BottomSheetCourtOptionsBinding
+import com.example.sports_court_rater.databinding.BottomSheetReviewOptionsBinding
+import com.example.sports_court_rater.databinding.DialogAddReviewBinding
 import com.example.sports_court_rater.databinding.FragmentProfileBinding
 import com.example.sports_court_rater.ui.home.CourtAdapter
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -53,6 +56,11 @@ class ProfileFragment : Fragment() {
         setupRecyclerViews()
         setupUI()
         observeViewModel()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.loadUserData() // Refresh data when returning to profile
     }
 
     private fun setupUI() {
@@ -187,12 +195,17 @@ class ProfileFragment : Fragment() {
             }
         )
         
-        reviewAdapter = ReviewAdapter { courtId ->
-            val action = ProfileFragmentDirections.actionProfileFragmentToCourtInfoFragment(courtId)
-            findNavController().navigate(action)
-        }
+        reviewAdapter = ReviewAdapter(
+            onReviewClick = { courtId ->
+                val action = ProfileFragmentDirections.actionProfileFragmentToCourtInfoFragment(courtId)
+                findNavController().navigate(action)
+            },
+            onReviewLongClick = { review ->
+                showReviewOptionsBottomSheet(review)
+            }
+        )
         
-        binding.rvMyPosts.adapter = courtAdapter
+        binding.rvMyPosts.adapter = if (isShowingCourts) courtAdapter else reviewAdapter
     }
 
     private fun showPostOptionsBottomSheet(court: Court) {
@@ -214,6 +227,55 @@ class ProfileFragment : Fragment() {
         }
 
         bottomSheet.show()
+    }
+
+    private fun showReviewOptionsBottomSheet(review: Review) {
+        val bottomSheet = BottomSheetDialog(requireContext(), R.style.CustomBottomSheetDialogTheme)
+        val binding = BottomSheetReviewOptionsBinding.inflate(layoutInflater)
+        bottomSheet.setContentView(binding.root)
+
+        binding.btnEdit.setOnClickListener {
+            bottomSheet.dismiss()
+            showEditReviewDialog(review)
+        }
+
+        binding.btnDelete.setOnClickListener {
+            bottomSheet.dismiss()
+            showDeleteReviewConfirmation(review)
+        }
+
+        bottomSheet.show()
+    }
+
+    private fun showEditReviewDialog(review: Review) {
+        val dialogBinding = DialogAddReviewBinding.inflate(layoutInflater)
+        dialogBinding.dialogRatingBar.rating = review.rating
+        dialogBinding.etComment.setText(review.comment)
+        
+        AlertDialog.Builder(requireContext())
+            .setView(dialogBinding.root)
+            .setPositiveButton(R.string.add_review_save_button) { _, _ ->
+                val rating = dialogBinding.dialogRatingBar.rating
+                val comment = dialogBinding.etComment.text.toString()
+                if (rating > 0) {
+                    viewModel.updateReview(review.id, rating, comment)
+                } else {
+                    Toast.makeText(requireContext(), "אנא בחר דירוג", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton(R.string.cancel_button, null)
+            .show()
+    }
+
+    private fun showDeleteReviewConfirmation(review: Review) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("מחיקת דירוג")
+            .setMessage("האם אתה בטוח שברצונך למחוק את הדירוג שלך?")
+            .setPositiveButton("מחק") { _, _ ->
+                viewModel.deleteReview(review)
+            }
+            .setNegativeButton("ביטול", null)
+            .show()
     }
 
     private fun showDeleteConfirmation(court: Court) {
@@ -268,10 +330,10 @@ class ProfileFragment : Fragment() {
                 launch {
                     viewModel.deleteResult.collect { result ->
                         result?.onSuccess {
-                            Toast.makeText(requireContext(), "המגרש נמחק בהצלחה", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), "הפעולה בוצעה בהצלחה", Toast.LENGTH_SHORT).show()
                             viewModel.resetDeleteResult()
                         }?.onFailure {
-                            Toast.makeText(requireContext(), "המחיקה נכשלה: ${it.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), "הפעולה נכשלה: ${it.message}", Toast.LENGTH_SHORT).show()
                             viewModel.resetDeleteResult()
                         }
                     }
