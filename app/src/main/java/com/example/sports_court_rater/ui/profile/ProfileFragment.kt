@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -49,8 +50,8 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupUI()
         setupRecyclerViews()
+        setupUI()
         observeViewModel()
     }
 
@@ -63,14 +64,18 @@ class ProfileFragment : Fragment() {
             findNavController().navigate(action)
         }
 
-        binding.tabMyCourts.setOnClickListener {
-            isShowingCourts = true
-            updateTabUI()
+        binding.llCourtsCount.setOnClickListener {
+            if (!isShowingCourts) {
+                isShowingCourts = true
+                updateTabUI()
+            }
         }
 
-        binding.tabMyRatings.setOnClickListener {
-            isShowingCourts = false
-            updateTabUI()
+        binding.llRatingsCount.setOnClickListener {
+            if (isShowingCourts) {
+                isShowingCourts = false
+                updateTabUI()
+            }
         }
 
         binding.btnEditName.setOnClickListener {
@@ -80,6 +85,8 @@ class ProfileFragment : Fragment() {
         binding.btnChangePhoto.setOnClickListener {
             // Handle change photo logic
         }
+        
+        updateTabUI()
     }
 
     private fun refreshProfileHeader() {
@@ -136,27 +143,30 @@ class ProfileFragment : Fragment() {
     }
 
     private fun updateTabUI() {
+        val activeColor = ContextCompat.getColor(requireContext(), R.color.primary_green)
+        val inactiveColor = ContextCompat.getColor(requireContext(), R.color.gray_500)
+
         if (isShowingCourts) {
-            binding.tabMyCourts.setBackgroundResource(R.drawable.bg_circle_white)
-            binding.tabMyCourts.elevation = 4f
-            binding.tabMyCourts.setTextColor(resources.getColor(R.color.black, null))
-            
-            binding.tabMyRatings.setBackgroundResource(0)
-            binding.tabMyRatings.elevation = 0f
-            binding.tabMyRatings.setTextColor(resources.getColor(R.color.gray_500, null))
-            
+            binding.tvCourtsCount.setTextColor(activeColor)
+            binding.tvCourtsLabel.setTextColor(activeColor)
+            binding.indicatorCourts.visibility = View.VISIBLE
+
+            binding.tvRatingsCount.setTextColor(inactiveColor)
+            binding.tvRatingsLabel.setTextColor(inactiveColor)
+            binding.indicatorRatings.visibility = View.INVISIBLE
+
             binding.rvMyPosts.adapter = courtAdapter
             binding.tvEmptyState.isVisible = viewModel.userCourts.value.isEmpty() && !viewModel.isLoading.value
             binding.tvEmptyState.text = getString(R.string.profile_empty_courts)
         } else {
-            binding.tabMyRatings.setBackgroundResource(R.drawable.bg_circle_white)
-            binding.tabMyRatings.elevation = 4f
-            binding.tabMyRatings.setTextColor(resources.getColor(R.color.black, null))
-            
-            binding.tabMyCourts.setBackgroundResource(0)
-            binding.tabMyCourts.elevation = 0f
-            binding.tabMyCourts.setTextColor(resources.getColor(R.color.gray_500, null))
-            
+            binding.tvRatingsCount.setTextColor(activeColor)
+            binding.tvRatingsLabel.setTextColor(activeColor)
+            binding.indicatorRatings.visibility = View.VISIBLE
+
+            binding.tvCourtsCount.setTextColor(inactiveColor)
+            binding.tvCourtsLabel.setTextColor(inactiveColor)
+            binding.indicatorCourts.visibility = View.INVISIBLE
+
             binding.rvMyPosts.adapter = reviewAdapter
             binding.tvEmptyState.isVisible = viewModel.userReviews.value.isEmpty() && !viewModel.isLoading.value
             binding.tvEmptyState.text = "עדיין לא דירגת מגרשים"
@@ -221,7 +231,6 @@ class ProfileFragment : Fragment() {
                     viewModel.userCourts.collect { courts ->
                         courtAdapter.submitList(courts)
                         binding.tvCourtsCount.text = courts.size.toString()
-                        binding.tabMyCourts.text = "המגרשים שלי (${courts.size})"
                         if (isShowingCourts) {
                             binding.tvEmptyState.isVisible = courts.isEmpty() && !viewModel.isLoading.value
                         }
@@ -231,7 +240,6 @@ class ProfileFragment : Fragment() {
                     viewModel.userReviews.collect { reviews ->
                         reviewAdapter.submitList(reviews)
                         binding.tvRatingsCount.text = reviews.size.toString()
-                        binding.tabMyRatings.text = "הדירוגים שלי (${reviews.size})"
                         if (!isShowingCourts) {
                             binding.tvEmptyState.isVisible = reviews.isEmpty() && !viewModel.isLoading.value
                         }
