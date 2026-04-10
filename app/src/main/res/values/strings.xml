@@ -59,6 +59,11 @@
     <string name="min_rating_label">דירוג מינימלי</string>
     <string name="courts_found_format">%d מגרשים נמצאו</string>
 
+    <!-- Sport Emojis -->
+    <string name="emoji_basketball">🏀</string>
+    <string name="emoji_football">⚽</string>
+    <string name="emoji_tennis">🎾</string>
+
     <!-- Login Screen -->
     <string name="login_title">התחברות</string>
     <string name="email_label">אימייל</string>
