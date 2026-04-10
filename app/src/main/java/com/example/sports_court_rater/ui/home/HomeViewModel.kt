@@ -26,15 +26,14 @@ class HomeViewModel @Inject constructor(
     private val _sortType = MutableStateFlow(SortType.RATING)
     val sortType: StateFlow<SortType> = _sortType.asStateFlow()
 
-    // StateFlow that collects from the repository's Flow and applies sorting
     val courts: StateFlow<List<Court>> = combine(
         repository.getAllCourts(),
         _sortType
     ) { courts, sortType ->
         when (sortType) {
             SortType.RATING -> courts.sortedByDescending { it.rating }
-            SortType.NEW -> courts.reversed() // Assuming newer are at the end of the list from repo
-            SortType.NEAR -> courts // For now, near sorting requires location which we might add later
+            SortType.NEW -> courts.reversed()
+            SortType.NEAR -> courts
         }
     }.stateIn(
         scope = viewModelScope,
@@ -42,11 +41,10 @@ class HomeViewModel @Inject constructor(
         initialValue = emptyList()
     )
 
-    private val _isLoading = MutableStateFlow(false)
+    private val _isLoading = MutableStateFlow(true) // Start as true to show skeleton immediately
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     init {
-        // Optionally refresh data when ViewModel is first created
         refreshCourts()
     }
 
@@ -60,7 +58,7 @@ class HomeViewModel @Inject constructor(
             try {
                 repository.refreshCourts()
             } catch (e: Exception) {
-                // Handle error if needed
+                // Handle error
             } finally {
                 _isLoading.value = false
             }
