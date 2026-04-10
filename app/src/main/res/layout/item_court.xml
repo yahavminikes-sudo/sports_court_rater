@@ -33,6 +33,30 @@
                 android:contentDescription="@null"
                 android:scaleType="centerCrop" />
 
+            <!-- Default Sport Emoji Container -->
+            <FrameLayout
+                android:id="@+id/flDefaultEmojiContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <View
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_circle_light_grey"
+                    android:alpha="0.5"/>
+
+                <TextView
+                    android:id="@+id/tvDefaultEmoji"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:textSize="40sp"
+                    tools:text="@string/emoji_basketball" />
+            </FrameLayout>
+
             <!-- Sport Type Badge -->
             <TextView
                 android:id="@+id/tvSportType"

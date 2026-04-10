@@ -31,6 +31,7 @@ class EditPostFragment : Fragment() {
     private val args: EditPostFragmentArgs by navArgs()
 
     private var selectedImageUri: Uri? = null
+    private var currentSelectedSport: String = ""
 
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
@@ -62,20 +63,24 @@ class EditPostFragment : Fragment() {
 
     private fun setupInitialData() {
         val court = args.court
+        currentSelectedSport = court.sportType
         binding.apply {
             etCourtName.setText(court.courtName)
             etDescription.setText(court.description)
             ratingBar.rating = court.rating
             etLocation.setText("${court.latitude}, ${court.longitude}")
-            etLocation.isEnabled = false // Usually we don't edit location of an existing court
-            btnUseCurrentLocation.visibility = View.GONE
+            etLocation.isEnabled = false 
+            btnCurrentLocation.visibility = View.GONE
             
-            updateSportSelectionUI(court.sportType)
+            updateSportSelectionUI(currentSelectedSport)
             
             if (court.imageUrl.isNotEmpty()) {
                 Picasso.get().load(court.imageUrl).into(ivCourtImage)
                 ivCourtImage.visibility = View.VISIBLE
                 placeholderContainer.visibility = View.GONE
+            } else {
+                ivCourtImage.visibility = View.GONE
+                placeholderContainer.visibility = View.VISIBLE
             }
             
             btnPostCourt.text = "עדכון מגרש"
@@ -87,20 +92,32 @@ class EditPostFragment : Fragment() {
             pickImageLauncher.launch("image/*")
         }
 
+        binding.llBasketball.setOnClickListener {
+            currentSelectedSport = getString(R.string.basketball)
+            updateSportSelectionUI(currentSelectedSport)
+        }
+        binding.llFootball.setOnClickListener {
+            currentSelectedSport = getString(R.string.football)
+            updateSportSelectionUI(currentSelectedSport)
+        }
+        binding.llTennis.setOnClickListener {
+            currentSelectedSport = getString(R.string.tennis)
+            updateSportSelectionUI(currentSelectedSport)
+        }
+
         binding.btnPostCourt.setOnClickListener {
             val name = binding.etCourtName.text.toString().trim()
             val description = binding.etDescription.text.toString().trim()
             val rating = binding.ratingBar.rating
-            val sport = args.court.sportType // Simplified: keeping current sport or you can add selection logic
             
             if (name.isNotEmpty()) {
-                viewModel.updatePost(name, sport, rating, description, selectedImageUri)
+                viewModel.updatePost(name, currentSelectedSport, rating, description, selectedImageUri)
             } else {
                 Toast.makeText(requireContext(), "נא להזין שם מגרש", Toast.LENGTH_SHORT).show()
             }
         }
 
-        binding.btnCancel.setOnClickListener {
+        binding.btnBack.setOnClickListener {
             handleBackNavigation()
         }
     }
@@ -118,17 +135,14 @@ class EditPostFragment : Fragment() {
         val unselectedTextColor = ContextCompat.getColor(requireContext(), R.color.gray_700)
 
         binding.apply {
-            llBasketball.setBackgroundResource(if (selectedSport == "basketball") selectedBg else unselectedBg)
-            tvBasketballLabel.setTextColor(if (selectedSport == "basketball") selectedTextColor else unselectedTextColor)
-            ivBasketballIcon.setColorFilter(if (selectedSport == "basketball") selectedTextColor else unselectedTextColor)
+            llBasketball.setBackgroundResource(if (selectedSport == getString(R.string.basketball)) selectedBg else unselectedBg)
+            tvBasketballLabel.setTextColor(if (selectedSport == getString(R.string.basketball)) selectedTextColor else unselectedTextColor)
 
-            llFootball.setBackgroundResource(if (selectedSport == "football") selectedBg else unselectedBg)
-            tvFootballLabel.setTextColor(if (selectedSport == "football") selectedTextColor else unselectedTextColor)
-            ivFootballIcon.setColorFilter(if (selectedSport == "football") selectedTextColor else unselectedTextColor)
+            llFootball.setBackgroundResource(if (selectedSport == getString(R.string.football)) selectedBg else unselectedBg)
+            tvFootballLabel.setTextColor(if (selectedSport == getString(R.string.football)) selectedTextColor else unselectedTextColor)
 
-            llTennis.setBackgroundResource(if (selectedSport == "tennis") selectedBg else unselectedBg)
-            tvTennisLabel.setTextColor(if (selectedSport == "tennis") selectedTextColor else unselectedTextColor)
-            ivTennisIcon.setColorFilter(if (selectedSport == "tennis") selectedTextColor else unselectedTextColor)
+            llTennis.setBackgroundResource(if (selectedSport == getString(R.string.tennis)) selectedBg else unselectedBg)
+            tvTennisLabel.setTextColor(if (selectedSport == getString(R.string.tennis)) selectedTextColor else unselectedTextColor)
         }
     }
 
@@ -142,6 +156,7 @@ class EditPostFragment : Fragment() {
                             binding.btnPostCourt.isEnabled = false
                         }
                         is EditPostViewModel.EditPostState.Success -> {
+                            binding.progressBar.visibility = View.GONE
                             Toast.makeText(requireContext(), "עודכן בהצלחה", Toast.LENGTH_SHORT).show()
                             findNavController().popBackStack()
                         }
