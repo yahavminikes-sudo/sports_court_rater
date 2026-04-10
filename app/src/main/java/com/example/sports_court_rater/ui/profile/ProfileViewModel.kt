@@ -112,6 +112,41 @@ class ProfileViewModel @Inject constructor(
         updateProfile(newName, null)
     }
 
+    fun updateReview(reviewId: String, rating: Float, comment: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val reviewSnapshot = firestore.collection("reviews").document(reviewId).get().await()
+                val existingReview = reviewSnapshot.toObject(Review::class.java) ?: return@launch
+                
+                val updatedReview = existingReview.copy(
+                    rating = rating,
+                    comment = comment
+                )
+                repository.saveReview(updatedReview)
+                loadUserData()
+            } catch (e: Exception) {
+                _updateResult.value = Result.failure(e)
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun deleteReview(review: Review) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                repository.deleteReview(review)
+                loadUserData()
+            } catch (e: Exception) {
+                _deleteResult.value = Result.failure(e)
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
     fun deleteCourt(court: Court) {
         viewModelScope.launch {
             _isLoading.value = true

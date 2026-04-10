@@ -31,6 +31,52 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvHeaderTitle" />
 
+    <LinearLayout
+        android:id="@+id/sortOptionsLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvHeaderSubtitle">
+
+        <TextView
+            android:id="@+id/btnSortNear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_sort_button"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="8dp"
+            android:text="@string/sort_near"
+            android:textColor="@color/sort_button_text_color"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/btnSortNew"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:background="@drawable/bg_sort_button"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="8dp"
+            android:text="@string/sort_new"
+            android:textColor="@color/sort_button_text_color"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/btnSortRating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_sort_button"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="8dp"
+            android:text="@string/sort_rating"
+            android:textColor="@color/sort_button_text_color"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
     <View
         android:id="@+id/headerDivider"
         android:layout_width="match_parent"
@@ -38,7 +84,7 @@
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="16dp"
         android:background="@color/divider_color"
-        app:layout_constraintTop_toBottomOf="@id/tvHeaderSubtitle" />
+        app:layout_constraintTop_toBottomOf="@id/sortOptionsLayout" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvCourts"

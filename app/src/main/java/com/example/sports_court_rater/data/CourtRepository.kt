@@ -50,14 +50,27 @@ class CourtRepository @Inject constructor(
     }
 
     /**
-     * Fetches courts created by a specific user from Firestore.
+     * Fetches courts created by a specific user.
+     * Tries local cache first, then Firestore.
      */
     suspend fun getCourtsByCreatorId(creatorId: String): List<Court> {
+        // 1. Check local cache first (guarantees newly created courts show up)
+        val localCourts = courtDao.getByCreatorId(creatorId)
+        
+        // 2. Fetch from Firestore to sync
         return try {
             val snapshot = remoteDataSource.whereEqualTo("creatorId", creatorId).get().await()
-            snapshot.toObjects(Court::class.java)
+            val remoteCourts = snapshot.toObjects(Court::class.java)
+            
+            // Update local cache if needed
+            if (remoteCourts.isNotEmpty()) {
+                courtDao.insertAll(remoteCourts)
+            }
+            
+            // Return either remote data or local data (preferring local if remote is empty)
+            remoteCourts.ifEmpty { localCourts }
         } catch (e: Exception) {
-            emptyList()
+            localCourts // Fallback to local on error
         }
     }
 
@@ -73,6 +86,53 @@ class CourtRepository @Inject constructor(
             snapshot.toObjects(Review::class.java)
         } catch (e: Exception) {
             emptyList()
+        }
+    }
+
+    suspend fun getReviewsByCourtId(courtId: String): List<Review> {
+        return try {
+            val snapshot = firestore.collection("reviews")
+                .whereEqualTo("courtId", courtId)
+                .get()
+                .await()
+            snapshot.toObjects(Review::class.java)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    suspend fun saveReview(review: Review) {
+        firestore.collection("reviews").document(review.id).set(review).await()
+        
+        // Update court rating
+        updateCourtRating(review.courtId)
+    }
+
+    suspend fun deleteReview(review: Review) {
+        firestore.collection("reviews").document(review.id).delete().await()
+        updateCourtRating(review.courtId)
+    }
+
+    private suspend fun updateCourtRating(courtId: String) {
+        val reviews = getReviewsByCourtId(courtId)
+        val averageRating = if (reviews.isNotEmpty()) {
+            reviews.map { it.rating }.average().toFloat()
+        } else {
+            0f
+        }
+        
+        // Update ONLY the rating field in the existing Firestore document
+        try {
+            remoteDataSource.document(courtId).update("rating", averageRating).await()
+        } catch (e: Exception) {
+            // Document might not exist or ID mismatch
+            e.printStackTrace()
+        }
+        
+        // Also update local Room database
+        val court = courtDao.getById(courtId)
+        if (court != null) {
+            courtDao.insert(court.copy(rating = averageRating))
         }
     }
 

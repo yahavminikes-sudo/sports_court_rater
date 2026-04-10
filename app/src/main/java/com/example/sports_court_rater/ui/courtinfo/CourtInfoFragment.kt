@@ -15,7 +15,11 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.sports_court_rater.R
+import com.example.sports_court_rater.Review
+import com.example.sports_court_rater.databinding.DialogAddReviewBinding
 import com.example.sports_court_rater.databinding.FragmentCourtInfoBinding
+import com.example.sports_court_rater.databinding.BottomSheetReviewOptionsBinding
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -29,6 +33,8 @@ class CourtInfoFragment : Fragment() {
 
     private val viewModel: CourtInfoViewModel by viewModels()
     private val args: CourtInfoFragmentArgs by navArgs()
+    
+    private lateinit var reviewAdapter: CourtReviewAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,6 +48,8 @@ class CourtInfoFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupRecyclerView()
+        
         binding.btnBack.setOnClickListener {
             findNavController().navigateUp()
         }
@@ -57,9 +65,76 @@ class CourtInfoFragment : Fragment() {
             showDeleteConfirmation()
         }
 
+        binding.btnAddReview.setOnClickListener {
+            showAddReviewDialog(null)
+        }
+
         viewModel.loadCourtDetails(args.courtId)
 
         observeViewModel()
+    }
+
+    private fun setupRecyclerView() {
+        reviewAdapter = CourtReviewAdapter { review ->
+            showReviewOptionsBottomSheet(review)
+        }
+        binding.rvReviews.adapter = reviewAdapter
+    }
+
+    private fun showReviewOptionsBottomSheet(review: Review) {
+        val bottomSheet = BottomSheetDialog(requireContext(), R.style.CustomBottomSheetDialogTheme)
+        val binding = BottomSheetReviewOptionsBinding.inflate(layoutInflater)
+        bottomSheet.setContentView(binding.root)
+
+        binding.btnEdit.setOnClickListener {
+            bottomSheet.dismiss()
+            showAddReviewDialog(review)
+        }
+
+        binding.btnDelete.setOnClickListener {
+            bottomSheet.dismiss()
+            showDeleteReviewConfirmation(review)
+        }
+
+        bottomSheet.show()
+    }
+
+    private fun showDeleteReviewConfirmation(review: Review) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("מחיקת דירוג")
+            .setMessage("האם אתה בטוח שברצונך למחוק את הדירוג שלך?")
+            .setPositiveButton("מחק") { _, _ ->
+                viewModel.deleteReview(review)
+            }
+            .setNegativeButton("ביטול", null)
+            .show()
+    }
+
+    private fun showAddReviewDialog(reviewToEdit: Review?) {
+        val dialogBinding = DialogAddReviewBinding.inflate(layoutInflater)
+        
+        reviewToEdit?.let {
+            dialogBinding.dialogRatingBar.rating = it.rating
+            dialogBinding.etComment.setText(it.comment)
+        }
+        
+        AlertDialog.Builder(requireContext())
+            .setView(dialogBinding.root)
+            .setPositiveButton(if (reviewToEdit == null) R.string.submit_button else R.string.add_review_save_button) { _, _ ->
+                val rating = dialogBinding.dialogRatingBar.rating
+                val comment = dialogBinding.etComment.text.toString()
+                if (rating > 0) {
+                    if (reviewToEdit == null) {
+                        viewModel.addReview(rating, comment)
+                    } else {
+                        viewModel.updateReview(reviewToEdit.id, rating, comment)
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "אנא בחר דירוג", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton(R.string.cancel_button, null)
+            .show()
     }
 
     private fun showDeleteConfirmation() {
@@ -104,6 +179,16 @@ class CourtInfoFragment : Fragment() {
                                 }
                             }
                         }
+                    }
+                }
+
+                launch {
+                    viewModel.reviews.collect { reviews ->
+                        reviewAdapter.submitList(reviews)
+                        binding.tvReviewsLabel.text = getString(R.string.reviews_label, reviews.size)
+                        binding.tvRatingCount.text = getString(R.string.rating_count_format, reviews.size)
+                        binding.tvNoReviews.isVisible = reviews.isEmpty()
+                        binding.rvReviews.isVisible = reviews.isNotEmpty()
                     }
                 }
 

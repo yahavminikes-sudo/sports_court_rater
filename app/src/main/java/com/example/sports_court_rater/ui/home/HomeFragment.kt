@@ -37,6 +37,7 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupRecyclerView()
+        setupSortButtons()
         observeViewModel()
     }
 
@@ -48,6 +49,18 @@ class HomeFragment : Fragment() {
             }
         )
         binding.rvCourts.adapter = adapter
+    }
+
+    private fun setupSortButtons() {
+        binding.btnSortRating.setOnClickListener {
+            viewModel.setSortType(SortType.RATING)
+        }
+        binding.btnSortNew.setOnClickListener {
+            viewModel.setSortType(SortType.NEW)
+        }
+        binding.btnSortNear.setOnClickListener {
+            viewModel.setSortType(SortType.NEAR)
+        }
     }
 
     private fun observeViewModel() {
@@ -63,8 +76,19 @@ class HomeFragment : Fragment() {
                         binding.progressBar.isVisible = isLoading
                     }
                 }
+                launch {
+                    viewModel.sortType.collect { sortType ->
+                        updateSortUI(sortType)
+                    }
+                }
             }
         }
+    }
+
+    private fun updateSortUI(selectedType: SortType) {
+        binding.btnSortRating.isSelected = selectedType == SortType.RATING
+        binding.btnSortNew.isSelected = selectedType == SortType.NEW
+        binding.btnSortNear.isSelected = selectedType == SortType.NEAR
     }
 
     override fun onDestroyView() {
