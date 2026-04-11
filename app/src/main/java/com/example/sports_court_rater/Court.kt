@@ -7,13 +7,12 @@ import androidx.room.PrimaryKey
 import com.google.firebase.firestore.Exclude
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
-import java.util.UUID
 
 @Parcelize
 @Entity(tableName = "courts")
 data class Court(
     @PrimaryKey 
-    val id: String = UUID.randomUUID().toString(),
+    val id: String = "",
     val creatorId: String = "",
     val courtName: String = "",
     val sportType: String = "",

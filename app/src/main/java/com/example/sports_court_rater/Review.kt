@@ -1,9 +1,7 @@
 package com.example.sports_court_rater
 
-import java.util.UUID
-
 data class Review(
-    val id: String = UUID.randomUUID().toString(),
+    val id: String = "",
     val courtId: String = "",
     val creatorId: String = "",
     val creatorName: String = "",
