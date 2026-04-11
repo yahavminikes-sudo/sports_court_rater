@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.Toast
@@ -76,6 +77,7 @@ class ProfileFragment : Fragment() {
             if (!isShowingCourts) {
                 isShowingCourts = true
                 updateTabUI()
+                updateSkeletonLayout()
             }
         }
 
@@ -83,6 +85,7 @@ class ProfileFragment : Fragment() {
             if (isShowingCourts) {
                 isShowingCourts = false
                 updateTabUI()
+                updateSkeletonLayout()
             }
         }
 
@@ -95,6 +98,65 @@ class ProfileFragment : Fragment() {
         }
         
         updateTabUI()
+        updateSkeletonLayout()
+    }
+
+    private fun updateSkeletonLayout() {
+        binding.llSkeletonContainer.removeAllViews()
+        val layoutId = if (isShowingCourts) R.layout.item_court_skeleton else R.layout.item_review_skeleton
+        val inflater = LayoutInflater.from(context)
+        for (i in 0 until 3) {
+            inflater.inflate(layoutId, binding.llSkeletonContainer, true)
+        }
+    }
+
+    private fun startSkeletonAnimation() {
+        val pulseAnimation = AnimationUtils.loadAnimation(context, R.anim.pulse)
+        fun applyPulse(view: View) {
+            if (view is ViewGroup) {
+                for (i in 0 until view.childCount) {
+                    applyPulse(view.getChildAt(i))
+                }
+            } else if (view.background != null && view.id != View.NO_ID) {
+                // Apply animation to views that look like skeleton parts
+                view.startAnimation(pulseAnimation)
+            }
+        }
+        applyPulse(binding.llSkeletonContainer)
+    }
+
+    private fun stopSkeletonAnimation() {
+        fun clearAnims(view: View) {
+            view.clearAnimation()
+            if (view is ViewGroup) {
+                for (i in 0 until view.childCount) {
+                    clearAnims(view.getChildAt(i))
+                }
+            }
+        }
+        clearAnims(binding.llSkeletonContainer)
+    }
+
+    private fun handleLoadingState(isLoading: Boolean) {
+        if (isLoading) {
+            binding.llSkeletonContainer.isVisible = true
+            binding.rvMyPosts.isVisible = false
+            binding.tvEmptyState.isVisible = false
+            startSkeletonAnimation()
+        } else {
+            stopSkeletonAnimation()
+            
+            // Smooth cross-fade transition
+            binding.rvMyPosts.alpha = 0f
+            binding.rvMyPosts.isVisible = true
+            binding.rvMyPosts.animate().alpha(1f).setDuration(300).start()
+            
+            binding.llSkeletonContainer.animate().alpha(0f).setDuration(300).withEndAction {
+                binding.llSkeletonContainer.isVisible = false
+                binding.llSkeletonContainer.alpha = 1f
+                updateTabUI() // Ensure empty state is checked correctly after loading
+            }.start()
+        }
     }
 
     private fun refreshProfileHeader() {
@@ -309,7 +371,7 @@ class ProfileFragment : Fragment() {
                 }
                 launch {
                     viewModel.isLoading.collect { isLoading ->
-                        binding.progressBar.isVisible = isLoading
+                        handleLoadingState(isLoading)
                     }
                 }
                 launch {
