@@ -35,7 +35,8 @@ class ProfileViewModel @Inject constructor(
     private val _userReviews = MutableStateFlow<List<Review>>(emptyList())
     val userReviews: StateFlow<List<Review>> = _userReviews.asStateFlow()
 
-    private val _isLoading = MutableStateFlow(false)
+    // Start as true to prevent empty state flicker on first load
+    private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     private val _updateResult = MutableStateFlow<Result<Unit>?>(null)
@@ -51,21 +52,25 @@ class ProfileViewModel @Inject constructor(
     fun loadUserData() {
         val userId = currentUser?.uid ?: return
         viewModelScope.launch {
-            _isLoading.value = true
+            // Only show skeleton if we have no data yet
+            if (_userCourts.value.isEmpty() && _userReviews.value.isEmpty()) {
+                _isLoading.value = true
+            }
             
-            val courtsDeferred = repository.getCourtsByCreatorId(userId)
-            val reviewsDeferred = repository.getReviewsByCreatorId(userId)
-            
-            _userCourts.value = courtsDeferred
-            _userReviews.value = reviewsDeferred
-            
-            _isLoading.value = false
+            try {
+                val courts = repository.getCourtsByCreatorId(userId)
+                val reviews = repository.getReviewsByCreatorId(userId)
+                
+                _userCourts.value = courts
+                _userReviews.value = reviews
+            } catch (e: Exception) {
+                // Error handling could be added here
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 
-    /**
-     * Updates the user profile with a new name and/or a new profile photo.
-     */
     fun updateProfile(newName: String, newPhotoUri: Uri?) {
         val user = auth.currentUser ?: return
         val userId = user.uid
@@ -75,14 +80,12 @@ class ProfileViewModel @Inject constructor(
             try {
                 var photoUrl = user.photoUrl?.toString()
 
-                // 1. Upload new photo to Firebase Storage if provided
                 if (newPhotoUri != null) {
                     val storageRef = storage.reference.child("profile_pics/$userId.jpg")
                     storageRef.putFile(newPhotoUri).await()
                     photoUrl = storageRef.downloadUrl.await().toString()
                 }
 
-                // 2. Update Firebase Auth Profile
                 val profileUpdates = userProfileChangeRequest {
                     displayName = newName
                     if (photoUrl != null) {
@@ -91,7 +94,6 @@ class ProfileViewModel @Inject constructor(
                 }
                 user.updateProfile(profileUpdates).await()
 
-                // 3. Update cached user info in Firestore
                 val userUpdates = mapOf(
                     "displayName" to newName,
                     "profilePictureUrl" to (photoUrl ?: "")
@@ -99,7 +101,7 @@ class ProfileViewModel @Inject constructor(
                 firestore.collection("users").document(userId).update(userUpdates).await()
 
                 _updateResult.value = Result.success(Unit)
-                loadUserData() // Refresh local data
+                loadUserData()
             } catch (e: Exception) {
                 _updateResult.value = Result.failure(e)
             } finally {
@@ -153,7 +155,7 @@ class ProfileViewModel @Inject constructor(
             try {
                 repository.deleteCourt(court.id, court.imageUrl)
                 _deleteResult.value = Result.success(Unit)
-                loadUserData() // Refresh the list
+                loadUserData()
             } catch (e: Exception) {
                 _deleteResult.value = Result.failure(e)
             } finally {
