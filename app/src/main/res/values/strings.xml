@@ -52,7 +52,11 @@
     <string name="creator_image_desc">תמונת המפרסם</string>
     <string name="reviews_icon_desc">סמל דירוגים</string>
     <string name="add_review_button">הוסף דירוג</string>
-    <string name="add_review_dialog_title">הוספת דירוג</string>
+    <string name="add_review_dialog_title">הוסף דירוג</string>
+    <string name="rating_label">דירוג</string>
+    <string name="comment_label">תגובה</string>
+    <string name="comment_hint">ספר על החוויה שלך…</string>
+    <string name="submit_review_button">שלח דירוג</string>
     <string name="add_review_comment_hint">כתוב את דעתך על המגרש...</string>
     <string name="add_review_save_button">עדכן דירוג</string>
     <string name="cancel_button">ביטול</string>

@@ -71,7 +71,9 @@ class HomeFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.courts.collect { courts ->
-                        adapter.submitList(courts)
+                        adapter.submitList(courts) {
+                            binding.rvCourts.scrollToPosition(0)
+                        }
                     }
                 }
                 launch {

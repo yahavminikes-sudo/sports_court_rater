@@ -2,6 +2,7 @@ package com.example.sports_court_rater.ui.courtinfo
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.appcompat.widget.TooltipCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -36,6 +37,8 @@ class CourtReviewAdapter(
         fun bind(review: Review) {
             binding.apply {
                 tvReviewerName.text = review.creatorName
+                TooltipCompat.setTooltipText(tvReviewerName, review.creatorName)
+
                 tvReviewDate.text = review.date
                 rbRating.rating = review.rating
                 tvReviewComment.text = review.comment

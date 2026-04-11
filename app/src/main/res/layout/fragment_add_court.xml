@@ -20,13 +20,16 @@
             android:layout_height="?attr/actionBarSize">
 
             <TextView
+                android:id="@+id/tvHeaderTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="@string/add_new_court_header"
                 android:textColor="@color/black"
                 android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:ellipsize="end"
+                android:maxLines="1" />
 
             <ImageButton
                 android:id="@+id/btnBack"
