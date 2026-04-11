@@ -2,15 +2,16 @@ package com.example.sports_court_rater
 
 import android.os.Parcelable
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
-import com.google.firebase.firestore.DocumentId
+import com.google.firebase.firestore.Exclude
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import java.util.UUID
 
 @Parcelize
 @Entity(tableName = "courts")
 data class Court(
-    @DocumentId
     @PrimaryKey 
     val id: String = UUID.randomUUID().toString(),
     val creatorId: String = "",
@@ -21,4 +22,9 @@ data class Court(
     val imageUrl: String = "",
     val rating: Float = 0f,
     val description: String = ""
-) : Parcelable
+) : Parcelable {
+    @Ignore
+    @get:Exclude
+    @IgnoredOnParcel
+    var locationName: String? = null
+}

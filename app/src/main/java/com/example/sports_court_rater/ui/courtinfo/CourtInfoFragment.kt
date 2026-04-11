@@ -157,7 +157,7 @@ class CourtInfoFragment : Fragment() {
                             binding.tvCourtName.text = it.courtName
                             binding.tvSportType.text = it.sportType
                             binding.tvDescription.text = it.description
-                            binding.tvLocationValue.text = getString(R.string.court_location_placeholder)
+                            binding.tvLocationValue.text = it.locationName ?: "${it.latitude}, ${it.longitude}"
                             binding.tvRatingScore.text = String.format(Locale.getDefault(), "%.1f", it.rating)
                             binding.ratingBar.rating = it.rating
                             

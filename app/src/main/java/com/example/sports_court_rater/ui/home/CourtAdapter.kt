@@ -37,7 +37,7 @@ class CourtAdapter(
                 tvCourtName.text = court.courtName
                 tvSportType.text = court.sportType
                 rbRating.rating = court.rating
-                tvLocation.text = "${court.latitude}, ${court.longitude}" 
+                tvLocation.text = court.locationName ?: "${court.latitude}, ${court.longitude}"
                 tvReviewCount.text = ""
 
                 if (court.imageUrl.isNotEmpty()) {
