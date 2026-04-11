@@ -100,6 +100,11 @@ class AddCourtFragment : Fragment() {
         binding.btnBack.setOnClickListener {
             handleBackNavigation()
         }
+
+        // Add court location can be manually edited
+        binding.etLocation.isFocusable = true
+        binding.etLocation.isFocusableInTouchMode = true
+        binding.etLocation.isClickable = true
     }
 
     private fun handleBackNavigation() {
@@ -110,7 +115,7 @@ class AddCourtFragment : Fragment() {
 
     private fun publishCourt() {
         val courtName = binding.etCourtName.text.toString().trim()
-        val location = binding.etLocation.text.toString().trim()
+        val locationText = binding.etLocation.text.toString().trim()
         val rating = binding.ratingBar.rating
 
         // Reset previous errors
@@ -122,9 +127,9 @@ class AddCourtFragment : Fragment() {
                 binding.etCourtName.error = requireContext().getString(R.string.court_name_label_required)
                 binding.etCourtName.requestFocus()
             }
-            location.isEmpty() -> {
+            locationText.isEmpty() -> {
                 binding.etLocation.error = requireContext().getString(R.string.location_label_required)
-                binding.etLocation.requestFocus()
+                Toast.makeText(requireContext(), R.string.location_label_required, Toast.LENGTH_SHORT).show()
             }
             rating == 0f -> {
                 Toast.makeText(
@@ -134,19 +139,21 @@ class AddCourtFragment : Fragment() {
                 ).show()
             }
             else -> {
-                submitCourtData(courtName, rating)
+                submitCourtData(courtName, locationText, rating)
             }
         }
     }
 
-    private fun submitCourtData(courtName: String, rating: Float) {
+    private fun submitCourtData(courtName: String, locationText: String, rating: Float) {
         val description = binding.etDescription.text.toString().trim()
-        viewModel.postCourt(courtName, description, rating)
+        viewModel.postCourt(courtName, description, rating, locationText)
     }
 
     private fun observeViewModel() {
-        viewModel.latitude.observe(viewLifecycleOwner) { updateLocationText() }
-        viewModel.longitude.observe(viewLifecycleOwner) { updateLocationText() }
+        viewModel.locationName.observe(viewLifecycleOwner) { name ->
+            binding.etLocation.setText(name)
+        }
+        
         viewModel.selectedSport.observe(viewLifecycleOwner) { sport ->
             updateSportSelectionUI(sport)
         }
@@ -225,14 +232,6 @@ class AddCourtFragment : Fragment() {
                 binding.llTennis.setBackgroundResource(selectedBg)
                 binding.tvTennisLabel.setTextColor(selectedTextColor)
             }
-        }
-    }
-
-    private fun updateLocationText() {
-        val lat = viewModel.latitude.value
-        val lng = viewModel.longitude.value
-        if (lat != null && lng != null) {
-            binding.etLocation.setText("$lat, $lng")
         }
     }
 

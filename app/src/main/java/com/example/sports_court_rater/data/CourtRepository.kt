@@ -71,8 +71,8 @@ class CourtRepository @Inject constructor(
         }
     }
 
-    private fun getLocationName(lat: Double, lng: Double): String {
-        return try {
+    suspend fun getLocationName(lat: Double, lng: Double): String = withContext(Dispatchers.IO) {
+        try {
             val geocoder = Geocoder(context, Locale("he", "IL"))
             val addresses = geocoder.getFromLocation(lat, lng, 1)
             if (!addresses.isNullOrEmpty()) {
@@ -95,6 +95,22 @@ class CourtRepository @Inject constructor(
             "$lat, $lng"
         }
     }
+
+    suspend fun getCoordinatesFromAddress(address: String): Pair<Double, Double>? =
+        withContext(Dispatchers.IO) {
+            try {
+                val geocoder = Geocoder(context, Locale("he", "IL"))
+                val addresses = geocoder.getFromLocationName(address, 1)
+                if (!addresses.isNullOrEmpty()) {
+                    val location = addresses[0]
+                    Pair(location.latitude, location.longitude)
+                } else {
+                    null
+                }
+            } catch (e: Exception) {
+                null
+            }
+        }
 
     /**
      * Fetches courts created by a specific user.
