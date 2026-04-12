@@ -62,7 +62,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:textSize="60sp"
-                        tools:text="🏀" />
+                        tools:text="@string/emoji_basketball" />
                 </FrameLayout>
             </FrameLayout>
 
