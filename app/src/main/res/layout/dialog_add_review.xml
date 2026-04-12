@@ -21,7 +21,7 @@
             android:contentDescription="@string/back_button_desc"
             android:src="@drawable/ic_close"
             app:tint="@color/gray_500"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -33,7 +33,7 @@
             android:textSize="22sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btnClose"
+            app:layout_constraintTop_toTopOf="@id/btnClose"
             android:layout_marginTop="8dp" />
 
         <TextView
@@ -48,7 +48,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/tvDialogTitle"
             app:layout_constraintTop_toBottomOf="@id/tvDialogTitle"
-            android:text="מגרש כדורגל גן מאיר" />
+            android:text="@string/court_name_placeholder" />
 
         <TextView
             android:id="@+id/tvRatingLabel"

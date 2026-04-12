@@ -46,6 +46,7 @@
     <string name="reviews_icon_desc">סמל דירוגים</string>
     <string name="add_review_button">הוסף דירוג</string>
     <string name="add_review_dialog_title">הוספת דירוג</string>
+    <string name="edit_review_dialog_title">עריכת דירוג</string>
     <string name="add_review_comment_hint">כתוב את דעתך על המגרש…</string>
     <string name="rating_label">דירוג</string>
     <string name="comment_label">תגובה</string>
@@ -96,7 +97,14 @@
     <string name="profile_ratings_count_label">דירוגים</string>
     <string name="profile_empty_courts">עדיין לא פרסמת מגרשים</string>
     <string name="profile_logout_desc">התנתקות</string>
+    <string name="profile_edit_name_dialog_title">עדכון שם</string>
+    <string name="save_button">שמור</string>
 
     <!-- Court Published Success Message -->
     <string name="court_published_success">המגרש פורסם בהצלחה!</string>
+
+    <!-- Dialogs -->
+    <string name="delete_dialog_title">מחק דירוג</string>
+    <string name="delete_dialog_message">האם אתה בטוח שברצונך למחוק את הדירוג? פעולה זו לא ניתנת לביטול.</string>
+    <string name="delete_button">מחק</string>
 </resources>
