@@ -69,6 +69,7 @@ class EditPostFragment : Fragment() {
         val court = args.court
         currentSelectedSport = court.sportType
         binding.apply {
+            tvToolbarTitle.text = getString(R.string.edit_court_header)
             etCourtName.setText(court.courtName)
             etDescription.setText(court.description)
             ratingBar.rating = court.rating

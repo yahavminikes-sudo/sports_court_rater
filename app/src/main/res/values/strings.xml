@@ -9,16 +9,9 @@
     <string name="sort_new">חדש</string>
     <string name="sort_near">קרוב</string>
 
-    <!-- Add Court Screen -->
-    <string name="add_court_title">הוספת מגרש חדש</string>
-    <string name="add_court_name_hint">שם המגרש</string>
-    <string name="add_court_sport_type_hint">סוג ספורט</string>
-    <string name="add_court_description_hint">תיאור</string>
-    <string name="add_court_image_url_hint">קישור לתמונה</string>
-    <string name="add_court_save_button">שמור מגרש</string>
-
-    <!-- New Add Court UI -->
+    <!-- Add and Edit Court Screens -->
     <string name="add_new_court_header">הוסף מגרש חדש</string>
+    <string name="edit_court_header">עריכת מגרש</string>
     <string name="court_photos_label">תמונות המגרש</string>
     <string name="add_photo_label">הוסף תמונה</string>
     <string name="court_name_label_required">שם המגרש *</string>
@@ -28,7 +21,7 @@
     <string name="location_hint">הזן כתובת או לחץ לאיתור GPS</string>
     <string name="use_current_location">השתמש במיקום הנוכחי</string>
     <string name="rating_label_required">דירוג *</string>
-    <string name="description_hint_detailed">ספר על מצב המגרש, תאורה, ציוד...</string>
+    <string name="description_hint_detailed">ספר על מצב המגרש, תאורה, ציוד…</string>
     <string name="post_court_button">פרסם מגרש</string>
 
     <!-- Item Court -->
@@ -53,7 +46,7 @@
     <string name="reviews_icon_desc">סמל דירוגים</string>
     <string name="add_review_button">הוסף דירוג</string>
     <string name="add_review_dialog_title">הוספת דירוג</string>
-    <string name="add_review_comment_hint">כתוב את דעתך על המגרש...</string>
+    <string name="add_review_comment_hint">כתוב את דעתך על המגרש…</string>
     <string name="add_review_save_button">עדכן דירוג</string>
     <string name="cancel_button">ביטול</string>
     <string name="submit_button">שלח</string>
