@@ -27,7 +27,9 @@
                 android:text="@string/add_new_court_header"
                 android:textColor="@color/black"
                 android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:ellipsize="end"
+                android:maxLines="1" />
 
             <ImageButton
                 android:id="@+id/btnBack"

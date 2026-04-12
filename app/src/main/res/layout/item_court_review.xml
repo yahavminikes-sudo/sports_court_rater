@@ -31,9 +31,12 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="12dp"
+        android:ellipsize="end"
+        android:maxLines="1"
         android:textColor="#000000"
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@id/ivReviewerImage"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/ivReviewerImage"
         tools:text="מיכל לוי" />
 
@@ -57,7 +60,7 @@
         android:textColor="#888888"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/tvReviewerName"
+        app:layout_constraintTop_toBottomOf="@id/rbRating"
         tools:text="2025-12-28" />
 
     <TextView
@@ -70,7 +73,7 @@
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="@id/rbRating"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/rbRating"
+        app:layout_constraintTop_toBottomOf="@id/tvReviewDate"
         tools:text="המגרש הכי טוב באזור! תמיד נקי ומתוחזק." />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

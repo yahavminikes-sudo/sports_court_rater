@@ -12,6 +12,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.sports_court_rater.databinding.FragmentHomeBinding
+import com.example.sports_court_rater.util.crossFade
+import com.example.sports_court_rater.util.startSkeletonAnimation
+import com.example.sports_court_rater.util.stopSkeletonAnimation
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -68,12 +71,14 @@ class HomeFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.courts.collect { courts ->
-                        adapter.submitList(courts)
+                        adapter.submitList(courts) {
+                            binding.rvCourts.scrollToPosition(0)
+                        }
                     }
                 }
                 launch {
                     viewModel.isLoading.collect { isLoading ->
-                        binding.progressBar.isVisible = isLoading
+                        handleLoadingState(isLoading)
                     }
                 }
                 launch {
@@ -82,6 +87,18 @@ class HomeFragment : Fragment() {
                     }
                 }
             }
+        }
+    }
+
+    private fun handleLoadingState(isLoading: Boolean) {
+        if (isLoading) {
+            binding.llSkeletonContainer.isVisible = true
+            binding.rvCourts.isVisible = false
+            binding.llSkeletonContainer.startSkeletonAnimation()
+        } else {
+            binding.llSkeletonContainer.stopSkeletonAnimation()
+            binding.rvCourts.crossFade(true)
+            binding.llSkeletonContainer.crossFade(false)
         }
     }
 

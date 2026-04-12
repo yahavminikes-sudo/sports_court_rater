@@ -1,12 +1,13 @@
 package com.example.sports_court_rater.ui.courtinfo
 
-import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.widget.TooltipCompat
 import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -17,9 +18,11 @@ import androidx.navigation.fragment.navArgs
 import com.example.sports_court_rater.R
 import com.example.sports_court_rater.Review
 import com.example.sports_court_rater.databinding.DialogAddReviewBinding
+import com.example.sports_court_rater.databinding.DialogConfirmDeleteBinding
 import com.example.sports_court_rater.databinding.FragmentCourtInfoBinding
 import com.example.sports_court_rater.databinding.BottomSheetReviewOptionsBinding
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -100,52 +103,91 @@ class CourtInfoFragment : Fragment() {
     }
 
     private fun showDeleteReviewConfirmation(review: Review) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("מחיקת דירוג")
-            .setMessage("האם אתה בטוח שברצונך למחוק את הדירוג שלך?")
-            .setPositiveButton("מחק") { _, _ ->
-                viewModel.deleteReview(review)
-            }
-            .setNegativeButton("ביטול", null)
-            .show()
+        val dialogBinding = DialogConfirmDeleteBinding.inflate(layoutInflater)
+        dialogBinding.tvTitle.text = "מחק דירוג"
+        dialogBinding.tvMessage.text = "האם אתה בטוח שברצונך למחוק את הדירוג? פעולה זו לא ניתנת לביטול."
+
+        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.TransparentDialog)
+            .setView(dialogBinding.root)
+            .create()
+
+        dialogBinding.btnDelete.setOnClickListener {
+            viewModel.deleteReview(review)
+            dialog.dismiss()
+        }
+
+        dialogBinding.btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun showAddReviewDialog(reviewToEdit: Review?) {
         val dialogBinding = DialogAddReviewBinding.inflate(layoutInflater)
         
+        val courtName = viewModel.court.value?.courtName ?: ""
+        dialogBinding.tvCourtName.text = courtName
+        TooltipCompat.setTooltipText(dialogBinding.tvCourtName, courtName)
+        
         reviewToEdit?.let {
             dialogBinding.dialogRatingBar.rating = it.rating
             dialogBinding.etComment.setText(it.comment)
+            dialogBinding.btnSubmit.text = getString(R.string.add_review_save_button)
+            dialogBinding.tvCharCount.text = "${it.comment.length}/500"
+        } ?: run {
+            dialogBinding.tvCharCount.text = "0/500"
         }
         
-        AlertDialog.Builder(requireContext())
+        dialogBinding.etComment.addTextChangedListener {
+            dialogBinding.tvCharCount.text = "${it?.length ?: 0}/500"
+        }
+        
+        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.TransparentDialog)
             .setView(dialogBinding.root)
-            .setPositiveButton(if (reviewToEdit == null) R.string.submit_button else R.string.add_review_save_button) { _, _ ->
-                val rating = dialogBinding.dialogRatingBar.rating
-                val comment = dialogBinding.etComment.text.toString()
-                if (rating > 0) {
-                    if (reviewToEdit == null) {
-                        viewModel.addReview(rating, comment)
-                    } else {
-                        viewModel.updateReview(reviewToEdit.id, rating, comment)
-                    }
+            .create()
+
+        dialogBinding.btnClose.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogBinding.btnSubmit.setOnClickListener {
+            val rating = dialogBinding.dialogRatingBar.rating
+            val comment = dialogBinding.etComment.text.toString()
+            if (rating > 0) {
+                if (reviewToEdit == null) {
+                    viewModel.addReview(rating, comment)
                 } else {
-                    Toast.makeText(requireContext(), "אנא בחר דירוג", Toast.LENGTH_SHORT).show()
+                    viewModel.updateReview(reviewToEdit.id, rating, comment)
                 }
+                dialog.dismiss()
+            } else {
+                Toast.makeText(requireContext(), "אנא בחר דירוג", Toast.LENGTH_SHORT).show()
             }
-            .setNegativeButton(R.string.cancel_button, null)
-            .show()
+        }
+
+        dialog.show()
     }
 
     private fun showDeleteConfirmation() {
-        AlertDialog.Builder(requireContext())
-            .setTitle("מחיקת מגרש")
-            .setMessage("האם אתה בטוח שברצונך למחוק את המגרש?")
-            .setPositiveButton("מחק") { _, _ ->
-                viewModel.deleteCourt()
-            }
-            .setNegativeButton("ביטול", null)
-            .show()
+        val dialogBinding = DialogConfirmDeleteBinding.inflate(layoutInflater)
+        dialogBinding.tvTitle.text = "מחק מגרש"
+        dialogBinding.tvMessage.text = "האם אתה בטוח שברצונך למחוק את המגרש? פעולה זו לא ניתנת לביטול."
+
+        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.TransparentDialog)
+            .setView(dialogBinding.root)
+            .create()
+
+        dialogBinding.btnDelete.setOnClickListener {
+            viewModel.deleteCourt()
+            dialog.dismiss()
+        }
+
+        dialogBinding.btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun observeViewModel() {
@@ -155,6 +197,8 @@ class CourtInfoFragment : Fragment() {
                     viewModel.court.collect { court ->
                         court?.let {
                             binding.tvCourtName.text = it.courtName
+                            TooltipCompat.setTooltipText(binding.tvCourtName, it.courtName)
+                            
                             binding.tvSportType.text = it.sportType
                             binding.tvDescription.text = it.description
                             binding.tvLocationValue.text = it.locationName ?: "${it.latitude}, ${it.longitude}"
@@ -238,6 +282,8 @@ class CourtInfoFragment : Fragment() {
                     viewModel.creator.collect { user ->
                         user?.let {
                             binding.tvCreatorName.text = it.displayName
+                            TooltipCompat.setTooltipText(binding.tvCreatorName, it.displayName)
+
                             if (it.profilePictureUrl.isNotEmpty()) {
                                 Picasso.get()
                                     .load(it.profilePictureUrl)

@@ -1,15 +1,16 @@
 package com.example.sports_court_rater.ui.profile
 
-import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -22,9 +23,11 @@ import com.example.sports_court_rater.Review
 import com.example.sports_court_rater.databinding.BottomSheetCourtOptionsBinding
 import com.example.sports_court_rater.databinding.BottomSheetReviewOptionsBinding
 import com.example.sports_court_rater.databinding.DialogAddReviewBinding
+import com.example.sports_court_rater.databinding.DialogConfirmDeleteBinding
 import com.example.sports_court_rater.databinding.FragmentProfileBinding
 import com.example.sports_court_rater.ui.home.CourtAdapter
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -76,6 +79,7 @@ class ProfileFragment : Fragment() {
             if (!isShowingCourts) {
                 isShowingCourts = true
                 updateTabUI()
+                updateSkeletonLayout()
             }
         }
 
@@ -83,6 +87,7 @@ class ProfileFragment : Fragment() {
             if (isShowingCourts) {
                 isShowingCourts = false
                 updateTabUI()
+                updateSkeletonLayout()
             }
         }
 
@@ -95,6 +100,65 @@ class ProfileFragment : Fragment() {
         }
         
         updateTabUI()
+        updateSkeletonLayout()
+    }
+
+    private fun updateSkeletonLayout() {
+        binding.llSkeletonContainer.removeAllViews()
+        val layoutId = if (isShowingCourts) R.layout.item_court_skeleton else R.layout.item_review_skeleton
+        val inflater = LayoutInflater.from(context)
+        for (i in 0 until 3) {
+            inflater.inflate(layoutId, binding.llSkeletonContainer, true)
+        }
+    }
+
+    private fun startSkeletonAnimation() {
+        val pulseAnimation = AnimationUtils.loadAnimation(context, R.anim.pulse)
+        fun applyPulse(view: View) {
+            if (view is ViewGroup) {
+                for (i in 0 until view.childCount) {
+                    applyPulse(view.getChildAt(i))
+                }
+            } else if (view.background != null && view.id != View.NO_ID) {
+                // Apply animation to views that look like skeleton parts
+                view.startAnimation(pulseAnimation)
+            }
+        }
+        applyPulse(binding.llSkeletonContainer)
+    }
+
+    private fun stopSkeletonAnimation() {
+        fun clearAnims(view: View) {
+            view.clearAnimation()
+            if (view is ViewGroup) {
+                for (i in 0 until view.childCount) {
+                    clearAnims(view.getChildAt(i))
+                }
+            }
+        }
+        clearAnims(binding.llSkeletonContainer)
+    }
+
+    private fun handleLoadingState(isLoading: Boolean) {
+        if (isLoading) {
+            binding.llSkeletonContainer.isVisible = true
+            binding.rvMyPosts.isVisible = false
+            binding.tvEmptyState.isVisible = false
+            startSkeletonAnimation()
+        } else {
+            stopSkeletonAnimation()
+            
+            // Smooth cross-fade transition
+            binding.rvMyPosts.alpha = 0f
+            binding.rvMyPosts.isVisible = true
+            binding.rvMyPosts.animate().alpha(1f).setDuration(300).start()
+            
+            binding.llSkeletonContainer.animate().alpha(0f).setDuration(300).withEndAction {
+                binding.llSkeletonContainer.isVisible = false
+                binding.llSkeletonContainer.alpha = 1f
+                updateTabUI() // Ensure empty state is checked correctly after loading
+            }.start()
+        }
     }
 
     private fun refreshProfileHeader() {
@@ -117,9 +181,6 @@ class ProfileFragment : Fragment() {
 
     private fun showEditNameDialog() {
         val context = requireContext()
-        val builder = AlertDialog.Builder(context)
-        builder.setTitle("עדכון שם")
-
         val input = EditText(context)
         input.setText(viewModel.currentUser?.displayName)
         input.setSelection(input.text.length)
@@ -134,20 +195,20 @@ class ProfileFragment : Fragment() {
         input.layoutParams = params
         container.addView(input)
         
-        builder.setView(container)
-
-        builder.setPositiveButton("שמור") { dialog, _ ->
-            val newName = input.text.toString().trim()
-            if (newName.isNotEmpty()) {
-                viewModel.updateDisplayName(newName)
+        MaterialAlertDialogBuilder(context)
+            .setTitle("עדכון שם")
+            .setView(container)
+            .setPositiveButton("שמור") { dialog, _ ->
+                val newName = input.text.toString().trim()
+                if (newName.isNotEmpty()) {
+                    viewModel.updateDisplayName(newName)
+                }
+                dialog.dismiss()
             }
-            dialog.dismiss()
-        }
-        builder.setNegativeButton("ביטול") { dialog, _ ->
-            dialog.cancel()
-        }
-
-        builder.show()
+            .setNegativeButton("ביטול") { dialog, _ ->
+                dialog.cancel()
+            }
+            .show()
     }
 
     private fun updateTabUI() {
@@ -246,44 +307,82 @@ class ProfileFragment : Fragment() {
 
     private fun showEditReviewDialog(review: Review) {
         val dialogBinding = DialogAddReviewBinding.inflate(layoutInflater)
+        
+        // Find court name if possible, or use a placeholder
+        val courtName = viewModel.userCourts.value.find { it.id == review.courtId }?.courtName ?: ""
+        dialogBinding.tvCourtName.text = courtName
+
         dialogBinding.dialogRatingBar.rating = review.rating
         dialogBinding.etComment.setText(review.comment)
+        dialogBinding.btnSubmit.text = getString(R.string.add_review_save_button)
         
-        AlertDialog.Builder(requireContext())
+        dialogBinding.tvCharCount.text = "${review.comment.length}/500"
+        dialogBinding.etComment.addTextChangedListener {
+            dialogBinding.tvCharCount.text = "${it?.length ?: 0}/500"
+        }
+
+        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.TransparentDialog)
             .setView(dialogBinding.root)
-            .setPositiveButton(R.string.add_review_save_button) { _, _ ->
-                val rating = dialogBinding.dialogRatingBar.rating
-                val comment = dialogBinding.etComment.text.toString()
-                if (rating > 0) {
-                    viewModel.updateReview(review.id, rating, comment)
-                } else {
-                    Toast.makeText(requireContext(), "אנא בחר דירוג", Toast.LENGTH_SHORT).show()
-                }
+            .create()
+
+        dialogBinding.btnClose.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogBinding.btnSubmit.setOnClickListener {
+            val rating = dialogBinding.dialogRatingBar.rating
+            val comment = dialogBinding.etComment.text.toString()
+            if (rating > 0) {
+                viewModel.updateReview(review.id, rating, comment)
+                dialog.dismiss()
+            } else {
+                Toast.makeText(requireContext(), "אנא בחר דירוג", Toast.LENGTH_SHORT).show()
             }
-            .setNegativeButton(R.string.cancel_button, null)
-            .show()
+        }
+
+        dialog.show()
     }
 
     private fun showDeleteReviewConfirmation(review: Review) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("מחיקת דירוג")
-            .setMessage("האם אתה בטוח שברצונך למחוק את הדירוג שלך?")
-            .setPositiveButton("מחק") { _, _ ->
-                viewModel.deleteReview(review)
-            }
-            .setNegativeButton("ביטול", null)
-            .show()
+        val dialogBinding = DialogConfirmDeleteBinding.inflate(layoutInflater)
+        dialogBinding.tvTitle.text = "מחק דירוג"
+        dialogBinding.tvMessage.text = "האם אתה בטוח שברצונך למחוק את הדירוג? פעולה זו לא ניתנת לביטול."
+
+        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.TransparentDialog)
+            .setView(dialogBinding.root)
+            .create()
+
+        dialogBinding.btnDelete.setOnClickListener {
+            viewModel.deleteReview(review)
+            dialog.dismiss()
+        }
+
+        dialogBinding.btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun showDeleteConfirmation(court: Court) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("מחיקת מגרש")
-            .setMessage("האם אתה בטוח שברצונך למחוק את '${court.courtName}'?")
-            .setPositiveButton("מחק") { _, _ ->
-                viewModel.deleteCourt(court)
-            }
-            .setNegativeButton("ביטול", null)
-            .show()
+        val dialogBinding = DialogConfirmDeleteBinding.inflate(layoutInflater)
+        dialogBinding.tvTitle.text = "מחק מגרש"
+        dialogBinding.tvMessage.text = "האם אתה בטוח שברצונך למחוק את '${court.courtName}'? פעולה זו לא ניתנת לביטול."
+
+        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.TransparentDialog)
+            .setView(dialogBinding.root)
+            .create()
+
+        dialogBinding.btnDelete.setOnClickListener {
+            viewModel.deleteCourt(court)
+            dialog.dismiss()
+        }
+
+        dialogBinding.btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun observeViewModel() {
@@ -309,7 +408,7 @@ class ProfileFragment : Fragment() {
                 }
                 launch {
                     viewModel.isLoading.collect { isLoading ->
-                        binding.progressBar.isVisible = isLoading
+                        handleLoadingState(isLoading)
                     }
                 }
                 launch {
@@ -330,7 +429,7 @@ class ProfileFragment : Fragment() {
                             Toast.makeText(requireContext(), "הפעולה בוצעה בהצלחה", Toast.LENGTH_SHORT).show()
                             viewModel.resetDeleteResult()
                         }?.onFailure {
-                            Toast.makeText(requireContext(), "הפעולה נכשלה: ${it.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), "הפעולה נכשל: ${it.message}", Toast.LENGTH_SHORT).show()
                             viewModel.resetDeleteResult()
                         }
                     }

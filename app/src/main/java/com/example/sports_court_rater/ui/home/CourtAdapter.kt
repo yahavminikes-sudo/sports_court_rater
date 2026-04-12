@@ -3,6 +3,7 @@ package com.example.sports_court_rater.ui.home
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.TooltipCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -35,6 +36,8 @@ class CourtAdapter(
         fun bind(court: Court) {
             binding.apply {
                 tvCourtName.text = court.courtName
+                TooltipCompat.setTooltipText(tvCourtName, court.courtName)
+
                 tvSportType.text = court.sportType
                 rbRating.rating = if (court.averageRating > 0) court.averageRating else court.rating
                 tvLocation.text = court.locationName ?: "${court.latitude}, ${court.longitude}"
