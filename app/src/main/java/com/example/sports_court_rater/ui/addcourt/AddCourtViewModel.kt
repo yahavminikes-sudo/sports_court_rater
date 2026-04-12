@@ -97,10 +97,16 @@ class AddCourtViewModel @Inject constructor(
                 }
 
                 // 2. Construct Court object (using UUID for ID)
-                val creatorId = authRepository.getCurrentUser()?.uid ?: ""
+                val currentUser = authRepository.getCurrentUser()
+                val creatorId = currentUser?.uid ?: ""
+                val creatorName = currentUser?.displayName ?: "Anonymous"
+                val creatorImageUrl = currentUser?.photoUrl?.toString() ?: ""
+                
                 val court = Court(
                     id = UUID.randomUUID().toString(),
                     creatorId = creatorId,
+                    creatorName = creatorName,
+                    creatorImageUrl = creatorImageUrl,
                     courtName = name,
                     sportType = sport,
                     latitude = finalLat,

@@ -48,13 +48,14 @@ class CourtRepository @Inject constructor(
 
     /**
      * Returns the data strictly from the Room DAO (local cache).
-     * Enriches courts with location names on the fly.
+     * Enriches courts with location names and average ratings on the fly.
      */
     fun getAllCourts(): Flow<List<Court>> {
         return courtDao.getAll().map { courts ->
             withContext(Dispatchers.IO) {
                 courts.forEach { court ->
                     court.locationName = getLocationName(court.latitude, court.longitude)
+                    court.averageRating = calculateAverageRating(court.id, court.rating)
                 }
                 courts
             }
@@ -66,9 +67,17 @@ class CourtRepository @Inject constructor(
             val court = courtDao.getById(id)
             court?.let {
                 it.locationName = getLocationName(it.latitude, it.longitude)
+                it.averageRating = calculateAverageRating(it.id, it.rating)
             }
             court
         }
+    }
+
+    private suspend fun calculateAverageRating(courtId: String, initialRating: Float): Float {
+        val reviews = getReviewsByCourtId(courtId)
+        val allRatings = reviews.map { it.rating }.toMutableList()
+        allRatings.add(initialRating)
+        return if (allRatings.isNotEmpty()) allRatings.average().toFloat() else initialRating
     }
 
     suspend fun getLocationName(lat: Double, lng: Double): String = withContext(Dispatchers.IO) {
@@ -120,7 +129,10 @@ class CourtRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             // 1. Check local cache first (guarantees newly created courts show up)
             val localCourts = courtDao.getByCreatorId(creatorId)
-            localCourts.forEach { it.locationName = getLocationName(it.latitude, it.longitude) }
+            localCourts.forEach { 
+                it.locationName = getLocationName(it.latitude, it.longitude)
+                it.averageRating = calculateAverageRating(it.id, it.rating)
+            }
 
             // 2. Fetch from Firestore to sync
             try {
@@ -133,7 +145,10 @@ class CourtRepository @Inject constructor(
                 }
 
                 val finalCourts = if (remoteCourts.isNotEmpty()) remoteCourts else localCourts
-                finalCourts.forEach { it.locationName = getLocationName(it.latitude, it.longitude) }
+                finalCourts.forEach { 
+                    it.locationName = getLocationName(it.latitude, it.longitude) 
+                    it.averageRating = calculateAverageRating(it.id, it.rating)
+                }
                 finalCourts
             } catch (e: Exception) {
                 localCourts // Fallback to local on error
@@ -170,37 +185,10 @@ class CourtRepository @Inject constructor(
 
     suspend fun saveReview(review: Review) {
         firestore.collection("reviews").document(review.id).set(review).await()
-
-        // Update court rating
-        updateCourtRating(review.courtId)
     }
 
     suspend fun deleteReview(review: Review) {
         firestore.collection("reviews").document(review.id).delete().await()
-        updateCourtRating(review.courtId)
-    }
-
-    private suspend fun updateCourtRating(courtId: String) {
-        val reviews = getReviewsByCourtId(courtId)
-        val averageRating = if (reviews.isNotEmpty()) {
-            reviews.map { it.rating }.average().toFloat()
-        } else {
-            0f
-        }
-
-        // Update ONLY the rating field in the existing Firestore document
-        try {
-            remoteDataSource.document(courtId).update("rating", averageRating).await()
-        } catch (e: Exception) {
-            // Document might not exist or ID mismatch
-            e.printStackTrace()
-        }
-
-        // Also update local Room database
-        val court = courtDao.getById(courtId)
-        if (court != null) {
-            courtDao.insert(court.copy(rating = averageRating))
-        }
     }
 
     suspend fun uploadImage(uri: Uri): String {

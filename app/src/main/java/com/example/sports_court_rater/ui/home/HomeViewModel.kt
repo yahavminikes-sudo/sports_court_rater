@@ -32,7 +32,9 @@ class HomeViewModel @Inject constructor(
         _sortType
     ) { courts, sortType ->
         when (sortType) {
-            SortType.RATING -> courts.sortedByDescending { it.rating }
+            SortType.RATING -> courts.sortedByDescending { 
+                if (it.averageRating > 0) it.averageRating else it.rating 
+            }
             SortType.NEW -> courts.reversed() // Assuming newer are at the end of the list from repo
             SortType.NEAR -> courts // For now, near sorting requires location which we might add later
         }

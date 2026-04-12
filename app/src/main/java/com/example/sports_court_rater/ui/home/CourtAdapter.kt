@@ -36,7 +36,7 @@ class CourtAdapter(
             binding.apply {
                 tvCourtName.text = court.courtName
                 tvSportType.text = court.sportType
-                rbRating.rating = court.rating
+                rbRating.rating = if (court.averageRating > 0) court.averageRating else court.rating
                 tvLocation.text = court.locationName ?: "${court.latitude}, ${court.longitude}"
                 tvReviewCount.text = ""
 

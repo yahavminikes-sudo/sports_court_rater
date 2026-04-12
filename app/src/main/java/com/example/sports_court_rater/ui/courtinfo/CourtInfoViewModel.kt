@@ -19,6 +19,7 @@ import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -56,7 +57,13 @@ class CourtInfoViewModel @Inject constructor(
                 _court.value = courtDetails
                 _isCreator.value = courtDetails.creatorId == auth.currentUser?.uid
                 fetchWeather(courtDetails.latitude, courtDetails.longitude)
-                fetchCreatorInfo(courtDetails.creatorId)
+                
+                _creator.value = User(
+                    userId = courtDetails.creatorId,
+                    displayName = courtDetails.creatorName.ifEmpty { "Anonymous" },
+                    profilePictureUrl = courtDetails.creatorImageUrl
+                )
+                
                 fetchReviews(courtId)
             } else {
                 _error.value = "Court not found"
@@ -79,19 +86,6 @@ class CourtInfoViewModel @Inject constructor(
         }
     }
 
-    private fun fetchCreatorInfo(userId: String) {
-        if (userId.isEmpty()) return
-        viewModelScope.launch {
-            try {
-                val snapshot = firestore.collection("users").document(userId).get().await()
-                val user = snapshot.toObject(User::class.java)
-                _creator.value = user
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
     private fun fetchReviews(courtId: String) {
         viewModelScope.launch {
             try {
@@ -109,14 +103,12 @@ class CourtInfoViewModel @Inject constructor(
         
         viewModelScope.launch {
             try {
-                val userSnapshot = firestore.collection("users").document(currentUser.uid).get().await()
-                val userData = userSnapshot.toObject(User::class.java)
-                
                 val review = Review(
+                    id = UUID.randomUUID().toString(),
                     courtId = currentCourt.id,
                     creatorId = currentUser.uid,
-                    creatorName = userData?.displayName ?: "User",
-                    creatorImageUrl = userData?.profilePictureUrl ?: "",
+                    creatorName = currentUser.displayName ?: "Anonymous",
+                    creatorImageUrl = currentUser.photoUrl?.toString() ?: "",
                     rating = rating,
                     comment = comment,
                     date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()),
@@ -131,6 +123,10 @@ class CourtInfoViewModel @Inject constructor(
     }
 
     fun updateReview(reviewId: String, rating: Float, comment: String) {
+        if (reviewId.isEmpty()) {
+            _error.value = "Failed to update review: Invalid ID"
+            return
+        }
         val currentCourt = _court.value ?: return
         viewModelScope.launch {
             try {
@@ -150,6 +146,10 @@ class CourtInfoViewModel @Inject constructor(
     }
 
     fun deleteReview(review: Review) {
+        if (review.id.isEmpty()) {
+            _error.value = "Failed to delete review: Invalid ID"
+            return
+        }
         val currentCourt = _court.value ?: return
         viewModelScope.launch {
             try {

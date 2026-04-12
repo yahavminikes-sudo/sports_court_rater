@@ -158,8 +158,10 @@ class CourtInfoFragment : Fragment() {
                             binding.tvSportType.text = it.sportType
                             binding.tvDescription.text = it.description
                             binding.tvLocationValue.text = it.locationName ?: "${it.latitude}, ${it.longitude}"
-                            binding.tvRatingScore.text = String.format(Locale.getDefault(), "%.1f", it.rating)
-                            binding.ratingBar.rating = it.rating
+                            
+                            val displayRating = if (it.averageRating > 0) it.averageRating else it.rating
+                            binding.tvRatingScore.text = String.format(Locale.getDefault(), "%.1f", displayRating)
+                            binding.ratingBar.rating = displayRating
                             
                             if (it.imageUrl.isNotEmpty()) {
                                 binding.ivCourtImage.visibility = View.VISIBLE
