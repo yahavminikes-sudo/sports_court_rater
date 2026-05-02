@@ -5,8 +5,10 @@ import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.google.firebase.firestore.Exclude
+import com.google.firebase.firestore.ServerTimestamp
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import java.util.Date
 
 @Parcelize
 @Entity(tableName = "courts")
@@ -22,7 +24,9 @@ data class Court(
     val longitude: Double = 0.0,
     val imageUrl: String = "",
     val rating: Float = 0f,
-    val description: String = ""
+    val description: String = "",
+    @ServerTimestamp
+    val date: Date? = null
 ) : Parcelable {
     @Ignore
     @get:Exclude

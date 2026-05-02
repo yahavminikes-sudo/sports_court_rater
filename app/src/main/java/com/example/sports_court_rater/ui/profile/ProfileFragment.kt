@@ -1,6 +1,5 @@
 package com.example.sports_court_rater.ui.profile
 
-import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -28,6 +27,7 @@ import com.example.sports_court_rater.util.crossFade
 import com.example.sports_court_rater.util.startSkeletonAnimation
 import com.example.sports_court_rater.util.stopSkeletonAnimation
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -122,7 +122,7 @@ class ProfileFragment : Fragment() {
         val dialogBinding = DialogEditNameBinding.inflate(layoutInflater)
         dialogBinding.etName.setText(viewModel.currentUser?.displayName)
         
-        val dialog = AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
+        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.TransparentDialog)
             .setView(dialogBinding.root)
             .create()
 
@@ -245,7 +245,7 @@ class ProfileFragment : Fragment() {
         dialogBinding.etComment.setText(review.comment)
         dialogBinding.btnSubmit.text = getString(R.string.add_review_save_button)
         
-        val dialog = AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
+        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.TransparentDialog)
             .setView(dialogBinding.root)
             .create()
 
@@ -260,7 +260,7 @@ class ProfileFragment : Fragment() {
             }
         }
 
-        dialogBinding.btnClose.setOnClickListener {
+        dialogBinding.btnCancel.setOnClickListener {
             dialog.dismiss()
         }
 
@@ -269,10 +269,10 @@ class ProfileFragment : Fragment() {
 
     private fun showDeleteReviewConfirmation(review: Review) {
         val dialogBinding = DialogConfirmDeleteBinding.inflate(layoutInflater)
-        dialogBinding.tvTitle.text = getString(R.string.delete_dialog_title)
+        dialogBinding.tvDialogTitle.text = getString(R.string.delete_dialog_title)
         dialogBinding.tvMessage.text = getString(R.string.delete_dialog_message)
         
-        val dialog = AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
+        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.TransparentDialog)
             .setView(dialogBinding.root)
             .create()
 
@@ -290,10 +290,10 @@ class ProfileFragment : Fragment() {
 
     private fun showDeleteConfirmation(court: Court) {
         val dialogBinding = DialogConfirmDeleteBinding.inflate(layoutInflater)
-        dialogBinding.tvTitle.text = "מחיקת מגרש"
+        dialogBinding.tvDialogTitle.text = "מחיקת מגרש"
         dialogBinding.tvMessage.text = "האם אתה בטוח שברצונך למחוק את '${court.courtName}'?"
         
-        val dialog = AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
+        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.TransparentDialog)
             .setView(dialogBinding.root)
             .create()
 

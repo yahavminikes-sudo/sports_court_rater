@@ -26,6 +26,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 import java.util.Locale
 
 @AndroidEntryPoint
@@ -104,7 +105,7 @@ class CourtInfoFragment : Fragment() {
 
     private fun showDeleteReviewConfirmation(review: Review) {
         val dialogBinding = DialogConfirmDeleteBinding.inflate(layoutInflater)
-        dialogBinding.tvTitle.text = "מחק דירוג"
+        dialogBinding.tvDialogTitle.text = "מחק דירוג"
         dialogBinding.tvMessage.text = "האם אתה בטוח שברצונך למחוק את הדירוג? פעולה זו לא ניתנת לביטול."
 
         val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.TransparentDialog)
@@ -147,7 +148,7 @@ class CourtInfoFragment : Fragment() {
             .setView(dialogBinding.root)
             .create()
 
-        dialogBinding.btnClose.setOnClickListener {
+        dialogBinding.btnCancel.setOnClickListener {
             dialog.dismiss()
         }
 
@@ -171,7 +172,7 @@ class CourtInfoFragment : Fragment() {
 
     private fun showDeleteConfirmation() {
         val dialogBinding = DialogConfirmDeleteBinding.inflate(layoutInflater)
-        dialogBinding.tvTitle.text = "מחק מגרש"
+        dialogBinding.tvDialogTitle.text = "מחק מגרש"
         dialogBinding.tvMessage.text = "האם אתה בטוח שברצונך למחוק את המגרש? פעולה זו לא ניתנת לביטול."
 
         val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.TransparentDialog)
@@ -202,6 +203,9 @@ class CourtInfoFragment : Fragment() {
                             binding.tvSportType.text = it.sportType
                             binding.tvDescription.text = it.description
                             binding.tvLocationValue.text = it.locationName ?: "${it.latitude}, ${it.longitude}"
+                            
+                            val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                            binding.tvPostDate.text = it.date?.let { date -> dateFormat.format(date) } ?: ""
                             
                             val displayRating = if (it.averageRating > 0) it.averageRating else it.rating
                             binding.tvRatingScore.text = String.format(Locale.getDefault(), "%.1f", displayRating)
@@ -283,21 +287,6 @@ class CourtInfoFragment : Fragment() {
                         user?.let {
                             binding.tvCreatorName.text = it.displayName
                             TooltipCompat.setTooltipText(binding.tvCreatorName, it.displayName)
-
-                            if (it.profilePictureUrl.isNotEmpty()) {
-                                Picasso.get()
-                                    .load(it.profilePictureUrl)
-                                    .placeholder(R.drawable.ic_person)
-                                    .into(binding.ivCreatorImage)
-                            }
-                        }
-                    }
-                }
-
-                launch {
-                    viewModel.error.collect { error ->
-                        error?.let {
-                            Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
                         }
                     }
                 }

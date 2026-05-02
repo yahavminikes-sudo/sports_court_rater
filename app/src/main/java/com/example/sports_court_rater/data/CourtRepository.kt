@@ -52,13 +52,12 @@ class CourtRepository @Inject constructor(
      */
     fun getAllCourts(): Flow<List<Court>> {
         return courtDao.getAll().map { courts ->
-            withContext(Dispatchers.IO) {
-                courts.forEach { court ->
-                    court.locationName = getLocationName(court.latitude, court.longitude)
-                    court.averageRating = calculateAverageRating(court.id, court.rating)
-                }
-                courts
+            // Use a for loop to handle suspending calls within the suspending map block
+            for (court in courts) {
+                court.locationName = getLocationName(court.latitude, court.longitude)
+                court.averageRating = calculateAverageRating(court.id, court.rating)
             }
+            courts
         }
     }
 
@@ -129,9 +128,9 @@ class CourtRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             // 1. Check local cache first (guarantees newly created courts show up)
             val localCourts = courtDao.getByCreatorId(creatorId)
-            localCourts.forEach { 
-                it.locationName = getLocationName(it.latitude, it.longitude)
-                it.averageRating = calculateAverageRating(it.id, it.rating)
+            for (court in localCourts) {
+                court.locationName = getLocationName(court.latitude, court.longitude)
+                court.averageRating = calculateAverageRating(court.id, court.rating)
             }
 
             // 2. Fetch from Firestore to sync
@@ -145,9 +144,9 @@ class CourtRepository @Inject constructor(
                 }
 
                 val finalCourts = if (remoteCourts.isNotEmpty()) remoteCourts else localCourts
-                finalCourts.forEach { 
-                    it.locationName = getLocationName(it.latitude, it.longitude) 
-                    it.averageRating = calculateAverageRating(it.id, it.rating)
+                for (court in finalCourts) {
+                    court.locationName = getLocationName(court.latitude, court.longitude) 
+                    court.averageRating = calculateAverageRating(court.id, court.rating)
                 }
                 finalCourts
             } catch (e: Exception) {

@@ -113,7 +113,8 @@ class AddCourtViewModel @Inject constructor(
                     longitude = finalLng,
                     imageUrl = imageUrl,
                     rating = rating,
-                    description = description
+                    description = description,
+                    date = null // Let Firestore fill this with @ServerTimestamp
                 )
 
                 // 3. Save this new Court object to the remote Firebase database

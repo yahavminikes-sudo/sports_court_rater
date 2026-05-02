@@ -17,7 +17,7 @@
             android:id="@+id/tvDialogTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/delete_dialog_title"
+            android:text="@string/profile_edit_name_dialog_title"
             android:textColor="@color/black"
             android:textSize="22sp"
             android:textStyle="bold"
@@ -26,17 +26,30 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/tvMessage"
-            android:layout_width="0dp"
+            android:id="@+id/tvNameLabel"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
-            android:lineSpacingExtra="4dp"
-            android:text="@string/delete_dialog_message"
-            android:textColor="@color/gray_500"
+            android:text="@string/display_name_label"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvDialogTitle" />
+
+        <EditText
+            android:id="@+id/etName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_rounded_input"
+            android:hint="@string/display_name_hint"
+            android:inputType="textPersonName"
+            android:padding="16dp"
+            android:textColor="@color/black"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvDialogTitle" />
+            app:layout_constraintTop_toBottomOf="@id/tvNameLabel" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -46,18 +59,18 @@
             android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvMessage">
+            app:layout_constraintTop_toBottomOf="@id/etName">
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnDelete"
+                android:id="@+id/btnSave"
                 android:layout_width="wrap_content"
                 android:layout_height="56dp"
                 android:minWidth="100dp"
-                android:text="@string/delete_button"
+                android:text="@string/save_button"
                 android:textColor="@color/white"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                app:backgroundTint="#D32F2F"
+                app:backgroundTint="#2E7D52"
                 app:cornerRadius="16dp" />
 
             <com.google.android.material.button.MaterialButton
