@@ -1,6 +1,8 @@
 package com.example.sports_court_rater.ui.editpost
 
 import android.net.Uri
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -22,6 +24,15 @@ class EditPostViewModel @Inject constructor(
     // 1. Receives existing Court object via safeArgs
     val court: Court? = savedStateHandle["court"]
 
+    private val _latitude = MutableLiveData<Double?>(court?.latitude)
+    val latitude: LiveData<Double?> = _latitude
+
+    private val _longitude = MutableLiveData<Double?>(court?.longitude)
+    val longitude: LiveData<Double?> = _longitude
+
+    private val _locationName = MutableLiveData<String?>()
+    val locationName: LiveData<String?> = _locationName
+
     sealed class EditPostState {
         object Idle : EditPostState()
         object Loading : EditPostState()
@@ -31,6 +42,21 @@ class EditPostViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow<EditPostState>(EditPostState.Idle)
     val uiState: StateFlow<EditPostState> = _uiState.asStateFlow()
+
+    init {
+        // Load initial location name
+        court?.let {
+            setLocation(it.latitude, it.longitude)
+        }
+    }
+
+    fun setLocation(lat: Double, lng: Double) {
+        _latitude.value = lat
+        _longitude.value = lng
+        viewModelScope.launch {
+            _locationName.value = courtRepository.getLocationName(lat, lng)
+        }
+    }
 
     /**
      * Updates the existing court post.
@@ -47,6 +73,9 @@ class EditPostViewModel @Inject constructor(
             return
         }
 
+        val lat = _latitude.value ?: currentCourt.latitude
+        val lng = _longitude.value ?: currentCourt.longitude
+
         viewModelScope.launch {
             _uiState.value = EditPostState.Loading
             try {
@@ -62,7 +91,9 @@ class EditPostViewModel @Inject constructor(
                     sportType = newSport,
                     rating = newRating,
                     description = newDescription,
-                    imageUrl = imageUrl
+                    imageUrl = imageUrl,
+                    latitude = lat,
+                    longitude = lng
                 )
 
                 courtRepository.saveCourt(updatedCourt)

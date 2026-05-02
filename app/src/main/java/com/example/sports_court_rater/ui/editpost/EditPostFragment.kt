@@ -19,6 +19,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.sports_court_rater.R
 import com.example.sports_court_rater.databinding.FragmentAddCourtBinding
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -31,6 +33,7 @@ class EditPostFragment : Fragment() {
 
     private val viewModel: EditPostViewModel by viewModels()
     private val args: EditPostFragmentArgs by navArgs()
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private var selectedImageUri: Uri? = null
     private var currentSelectedSport: String = ""
@@ -57,6 +60,7 @@ class EditPostFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
         setupInitialData()
         setupListeners()
@@ -67,17 +71,14 @@ class EditPostFragment : Fragment() {
         val court = args.court
         currentSelectedSport = court.sportType
         binding.apply {
+            tvToolbarTitle.text = getString(R.string.edit_court_header)
             etCourtName.setText(court.courtName)
             etDescription.setText(court.description)
             ratingBar.rating = court.rating
-            etLocation.setText("${court.latitude}, ${court.longitude}")
-            etLocation.isEnabled = false 
-            btnCurrentLocation.visibility = View.GONE
-            
-            // Set header title to "ערוך את (שם המגרש)"
+
             val headerTitle = "ערוך את ''${court.courtName}''"
-            tvHeaderTitle.text = headerTitle
-            TooltipCompat.setTooltipText(tvHeaderTitle, court.courtName)
+            tvToolbarTitle.text = headerTitle
+            TooltipCompat.setTooltipText(tvToolbarTitle, court.courtName)
             
             updateSportSelectionUI(currentSelectedSport)
             
@@ -91,6 +92,11 @@ class EditPostFragment : Fragment() {
             }
             
             btnPostCourt.text = "עדכון מגרש"
+            
+            // In Edit mode, location cannot be updated
+            etLocation.isEnabled = false
+            btnCurrentLocation.isEnabled = false
+            btnCurrentLocation.alpha = 0.5f
         }
     }
 
@@ -154,6 +160,10 @@ class EditPostFragment : Fragment() {
     }
 
     private fun observeViewModel() {
+        viewModel.locationName.observe(viewLifecycleOwner) { name ->
+            binding.etLocation.setText(name)
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->

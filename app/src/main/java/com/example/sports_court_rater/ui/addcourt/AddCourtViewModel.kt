@@ -28,6 +28,9 @@ class AddCourtViewModel @Inject constructor(
     private val _longitude = MutableLiveData<Double?>()
     val longitude: LiveData<Double?> = _longitude
 
+    private val _locationName = MutableLiveData<String?>()
+    val locationName: LiveData<String?> = _locationName
+
     private val _selectedSport = MutableLiveData<String>("basketball")
     val selectedSport: LiveData<String> = _selectedSport
 
@@ -47,6 +50,9 @@ class AddCourtViewModel @Inject constructor(
     fun setLocation(lat: Double, lng: Double) {
         _latitude.value = lat
         _longitude.value = lng
+        viewModelScope.launch {
+            _locationName.value = courtRepository.getLocationName(lat, lng)
+        }
     }
 
     fun setSport(sport: String) {
@@ -61,20 +67,28 @@ class AddCourtViewModel @Inject constructor(
      * Publishes a new court post by uploading the image (if present),
      * constructing the Court object, and saving it to Firebase.
      */
-    fun postCourt(name: String, description: String, rating: Float) {
-        val lat = _latitude.value
-        val lng = _longitude.value
+    fun postCourt(name: String, description: String, rating: Float, manualLocation: String) {
         val sport = _selectedSport.value ?: "basketball"
         val uri = _imageUri.value
-
-        if (lat == null || lng == null) {
-            _uiState.value = AddCourtState.Error("Location is required. Please use current location.")
-            return
-        }
 
         viewModelScope.launch {
             _uiState.value = AddCourtState.Loading
             try {
+                var finalLat = _latitude.value
+                var finalLng = _longitude.value
+
+                // If user changed the location text or didn't use GPS, try to geocode the manual text
+                if (manualLocation != _locationName.value || finalLat == null || finalLng == null) {
+                    val coords = courtRepository.getCoordinatesFromAddress(manualLocation)
+                    if (coords != null) {
+                        finalLat = coords.first
+                        finalLng = coords.second
+                    } else {
+                        _uiState.value = AddCourtState.Error("Could not find coordinates for the entered location.")
+                        return@launch
+                    }
+                }
+
                 // 1. Upload Image and retrieve download URL (Suspend function in Repository)
                 val imageUrl = if (uri != null) {
                     courtRepository.uploadImage(uri)
@@ -83,17 +97,24 @@ class AddCourtViewModel @Inject constructor(
                 }
 
                 // 2. Construct Court object (using UUID for ID)
-                val creatorId = authRepository.getCurrentUser()?.uid ?: ""
+                val currentUser = authRepository.getCurrentUser()
+                val creatorId = currentUser?.uid ?: ""
+                val creatorName = currentUser?.displayName ?: "Anonymous"
+                val creatorImageUrl = currentUser?.photoUrl?.toString() ?: ""
+                
                 val court = Court(
                     id = UUID.randomUUID().toString(),
                     creatorId = creatorId,
+                    creatorName = creatorName,
+                    creatorImageUrl = creatorImageUrl,
                     courtName = name,
                     sportType = sport,
-                    latitude = lat,
-                    longitude = lng,
+                    latitude = finalLat,
+                    longitude = finalLng,
                     imageUrl = imageUrl,
                     rating = rating,
-                    description = description
+                    description = description,
+                    date = null // Let Firestore fill this with @ServerTimestamp
                 )
 
                 // 3. Save this new Court object to the remote Firebase database

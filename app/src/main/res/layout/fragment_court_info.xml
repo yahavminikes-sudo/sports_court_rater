@@ -62,7 +62,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:textSize="60sp"
-                        tools:text="🏀" />
+                        tools:text="@string/emoji_basketball" />
                 </FrameLayout>
             </FrameLayout>
 
@@ -398,6 +398,7 @@
                             android:maxLines="1"
                             android:textColor="#000000"
                             android:textStyle="bold"
+                            android:textDirection="rtl"
                             app:layout_constraintEnd_toStartOf="@id/tvPostDate"
                             app:layout_constraintStart_toEndOf="@id/ivCreatorImage"
                             app:layout_constraintTop_toBottomOf="@id/tvCreatorLabel"

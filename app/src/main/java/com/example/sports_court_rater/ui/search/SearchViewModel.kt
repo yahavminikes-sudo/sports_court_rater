@@ -47,7 +47,9 @@ class SearchViewModel @Inject constructor(
         courts.filter { court ->
             val matchesQuery = court.courtName.contains(query, ignoreCase = true)
             val matchesSport = sport == "all" || court.sportType == sport
-            val matchesRating = court.rating >= minRating
+            
+            val effectiveRating = if (court.averageRating > 0) court.averageRating else court.rating
+            val matchesRating = effectiveRating >= minRating
 
             matchesQuery && matchesSport && matchesRating
         }

@@ -39,8 +39,8 @@ class CourtAdapter(
                 TooltipCompat.setTooltipText(tvCourtName, court.courtName)
 
                 tvSportType.text = court.sportType
-                rbRating.rating = court.rating
-                tvLocation.text = "${court.latitude}, ${court.longitude}" 
+                rbRating.rating = if (court.averageRating > 0) court.averageRating else court.rating
+                tvLocation.text = court.locationName ?: "${court.latitude}, ${court.longitude}"
                 tvReviewCount.text = ""
 
                 if (court.imageUrl.isNotEmpty()) {

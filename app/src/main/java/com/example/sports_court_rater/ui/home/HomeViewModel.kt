@@ -1,5 +1,6 @@
 package com.example.sports_court_rater.ui.home
 
+import android.location.Location
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sports_court_rater.Court
@@ -26,14 +27,31 @@ class HomeViewModel @Inject constructor(
     private val _sortType = MutableStateFlow(SortType.RATING)
     val sortType: StateFlow<SortType> = _sortType.asStateFlow()
 
+    private val _userLocation = MutableStateFlow<Pair<Double, Double>?>(null)
+
     val courts: StateFlow<List<Court>> = combine(
         repository.getAllCourts(),
-        _sortType
-    ) { courts, sortType ->
+        _sortType,
+        _userLocation
+    ) { courts, sortType, location ->
         when (sortType) {
-            SortType.RATING -> courts.sortedByDescending { it.rating }
-            SortType.NEW -> courts.reversed()
-            SortType.NEAR -> courts
+            SortType.RATING -> courts.sortedByDescending {
+                if (it.averageRating > 0) it.averageRating else it.rating
+            }
+            SortType.NEW -> courts.sortedByDescending { it.date }
+            SortType.NEAR -> if (location != null) {
+                courts.sortedBy { court ->
+                    val results = FloatArray(1)
+                    Location.distanceBetween(
+                        location.first, location.second,
+                        court.latitude, court.longitude,
+                        results
+                    )
+                    results[0]
+                }
+            } else {
+                courts
+            }
         }
     }.stateIn(
         scope = viewModelScope,
@@ -52,13 +70,17 @@ class HomeViewModel @Inject constructor(
         _sortType.value = sortType
     }
 
+    fun setUserLocation(lat: Double, lng: Double) {
+        _userLocation.value = Pair(lat, lng)
+    }
+
     fun refreshCourts() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
                 repository.refreshCourts()
             } catch (e: Exception) {
-                // Handle error
+                // Handle error if needed
             } finally {
                 _isLoading.value = false
             }
