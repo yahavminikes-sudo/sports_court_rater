@@ -21,6 +21,7 @@ import com.example.sports_court_rater.databinding.DialogAddReviewBinding
 import com.example.sports_court_rater.databinding.DialogConfirmDeleteBinding
 import com.example.sports_court_rater.databinding.FragmentCourtInfoBinding
 import com.example.sports_court_rater.databinding.BottomSheetReviewOptionsBinding
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.squareup.picasso.Picasso
@@ -53,6 +54,7 @@ class CourtInfoFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupRecyclerView()
+        setupSwipeToRefresh()
         
         binding.btnBack.setOnClickListener {
             findNavController().navigateUp()
@@ -76,6 +78,16 @@ class CourtInfoFragment : Fragment() {
         viewModel.loadCourtDetails(args.courtId)
 
         observeViewModel()
+    }
+
+    private fun setupSwipeToRefresh() {
+        binding.swipeRefresh.setOnRefreshListener {
+            viewModel.loadCourtDetails(args.courtId)
+        }
+        binding.swipeRefresh.setColorSchemeResources(R.color.primary_green)
+        binding.appBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
+            binding.swipeRefresh.isEnabled = verticalOffset == 0
+        })
     }
 
     private fun setupRecyclerView() {
@@ -246,6 +258,12 @@ class CourtInfoFragment : Fragment() {
                     viewModel.isCreator.collect { isCreator ->
                         binding.btnEdit.isVisible = isCreator
                         binding.btnDelete.isVisible = isCreator
+                    }
+                }
+
+                launch {
+                    viewModel.isLoading.collect { isLoading ->
+                        binding.swipeRefresh.isRefreshing = isLoading
                     }
                 }
 

@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -19,13 +20,14 @@ class SearchViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
-    val searchQuery: StateFlow<String> = _searchQuery
 
     private val _selectedSport = MutableStateFlow("all")
     val selectedSport: StateFlow<String> = _selectedSport
 
     private val _minimumRating = MutableStateFlow(0f)
-    val minimumRating: StateFlow<Float> = _minimumRating
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing
 
     val availableSports: StateFlow<List<String>> = repository.getAllCourts()
         .map { courts ->
@@ -58,6 +60,14 @@ class SearchViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
+
+    fun refresh() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            repository.refreshCourts()
+            _isRefreshing.value = false
+        }
+    }
 
     fun onSearchQueryChanged(query: String) {
         _searchQuery.value = query

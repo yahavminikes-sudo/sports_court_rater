@@ -16,6 +16,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.example.sports_court_rater.R
 import com.example.sports_court_rater.databinding.FragmentHomeBinding
 import com.example.sports_court_rater.util.crossFade
 import com.example.sports_court_rater.util.startSkeletonAnimation
@@ -67,6 +68,7 @@ class HomeFragment : Fragment() {
 
         setupRecyclerView()
         setupSortButtons()
+        setupSwipeToRefresh()
         observeViewModel()
     }
 
@@ -90,6 +92,13 @@ class HomeFragment : Fragment() {
         binding.btnSortNear.setOnClickListener {
             checkLocationPermissions()
         }
+    }
+
+    private fun setupSwipeToRefresh() {
+        binding.swipeRefresh.setOnRefreshListener {
+            viewModel.refreshCourts()
+        }
+        binding.swipeRefresh.setColorSchemeResources(R.color.primary_green)
     }
 
     private fun checkLocationPermissions() {
@@ -178,13 +187,20 @@ class HomeFragment : Fragment() {
     }
 
     private fun handleLoadingState(isLoading: Boolean) {
+        if (binding.swipeRefresh.isRefreshing) {
+            if (!isLoading) {
+                binding.swipeRefresh.isRefreshing = false
+            }
+            return
+        }
+
         if (isLoading) {
             binding.llSkeletonContainer.isVisible = true
-            binding.rvCourts.isVisible = false
+            binding.swipeRefresh.isVisible = false
             binding.llSkeletonContainer.startSkeletonAnimation()
         } else {
             binding.llSkeletonContainer.stopSkeletonAnimation()
-            binding.rvCourts.crossFade(true)
+            binding.swipeRefresh.crossFade(true)
             binding.llSkeletonContainer.crossFade(false)
         }
     }
