@@ -24,6 +24,10 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.io.File
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.example.sports_court_rater.databinding.BottomSheetImagePickerBinding
+import androidx.core.content.FileProvider
 
 @AndroidEntryPoint
 class AddCourtFragment : Fragment() {
@@ -33,6 +37,18 @@ class AddCourtFragment : Fragment() {
 
     private val viewModel: AddCourtViewModel by viewModels()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+
+    private var latestTmpUri: Uri? = null
+
+    private val takePictureLauncher = registerForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { isSuccess ->
+        if (isSuccess) {
+            latestTmpUri?.let { uri ->
+                viewModel.setImageUri(uri)
+            }
+        }
+    }
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -69,7 +85,7 @@ class AddCourtFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
 
         setupListeners()
         observeViewModel()
@@ -91,7 +107,7 @@ class AddCourtFragment : Fragment() {
         }
 
         binding.btnSelectImage.setOnClickListener {
-            pickImageLauncher.launch("image/*")
+            showImagePickerDialog()
         }
 
         binding.btnPostCourt.setOnClickListener {
@@ -112,6 +128,37 @@ class AddCourtFragment : Fragment() {
         if (!findNavController().navigateUp()) {
             findNavController().navigate(R.id.homeFragment)
         }
+    }
+
+    private fun showImagePickerDialog() {
+        val bottomSheet = BottomSheetDialog(requireContext(), R.style.CustomBottomSheetDialogTheme)
+        val pickerBinding = BottomSheetImagePickerBinding.inflate(layoutInflater)
+        bottomSheet.setContentView(pickerBinding.root)
+
+        pickerBinding.btnCamera.setOnClickListener {
+            bottomSheet.dismiss()
+            takePhoto()
+        }
+
+        pickerBinding.btnGallery.setOnClickListener {
+            bottomSheet.dismiss()
+            pickImageLauncher.launch("image/*")
+        }
+
+        bottomSheet.show()
+    }
+
+    private fun takePhoto() {
+        val tmpFile = File.createTempFile("tmp_image_file", ".png", requireContext().cacheDir).apply {
+            createNewFile()
+            deleteOnExit()
+        }
+        latestTmpUri = FileProvider.getUriForFile(
+            requireContext(),
+            "${requireContext().packageName}.fileprovider",
+            tmpFile
+        )
+        takePictureLauncher.launch(latestTmpUri)
     }
 
     private fun publishCourt() {
@@ -272,17 +319,32 @@ class AddCourtFragment : Fragment() {
             return
         }
 
-        fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
-            .addOnSuccessListener { location ->
-                if (location != null) {
-                    viewModel.setLocation(location.latitude, location.longitude)
-                } else {
-                    Toast.makeText(requireContext(), "Unable to fetch location. Try again.", Toast.LENGTH_SHORT).show()
+        try {
+            fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+                .addOnSuccessListener { location ->
+                    if (location != null) {
+                        viewModel.setLocation(location.latitude, location.longitude)
+                    } else {
+                        // Fallback to last location
+                        try {
+                            fusedLocationClient.lastLocation.addOnSuccessListener { lastLoc ->
+                                if (lastLoc != null) {
+                                    viewModel.setLocation(lastLoc.latitude, lastLoc.longitude)
+                                } else {
+                                    Toast.makeText(requireContext(), "Unable to fetch location. Try again.", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        } catch (e: SecurityException) {
+                            Toast.makeText(requireContext(), "Error fetching location: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }
-            }
-            .addOnFailureListener {
-                Toast.makeText(requireContext(), "Error fetching location: ${it.message}", Toast.LENGTH_SHORT).show()
-            }
+                .addOnFailureListener {
+                    Toast.makeText(requireContext(), "Error fetching location: ${it.message}", Toast.LENGTH_SHORT).show()
+                }
+        } catch (e: SecurityException) {
+            Toast.makeText(requireContext(), "Error fetching location: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onDestroyView() {

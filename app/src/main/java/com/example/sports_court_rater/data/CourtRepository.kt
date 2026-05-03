@@ -16,9 +16,16 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
+import com.cloudinary.utils.ObjectUtils
 
 class CourtRepository @Inject constructor(
     private val courtDao: CourtDao,
@@ -190,16 +197,49 @@ class CourtRepository @Inject constructor(
         firestore.collection("reviews").document(review.id).delete().await()
     }
 
-    suspend fun uploadImage(uri: Uri): String {
-        val fileName = "court_images/${UUID.randomUUID()}.jpg"
-        val ref = storage.reference.child(fileName)
-        ref.putFile(uri).await()
-        return ref.downloadUrl.await().toString()
+    suspend fun uploadImage(uri: Uri): String = suspendCancellableCoroutine { continuation ->
+        MediaManager.get().upload(uri)
+            .option("folder", "court_images")
+            .callback(object : UploadCallback {
+                override fun onStart(requestId: String?) {}
+                override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
+                override fun onSuccess(requestId: String?, resultData: Map<*, *>?) {
+                    val url = resultData?.get("secure_url") as? String ?: ""
+                    continuation.resume(url)
+                }
+                override fun onError(requestId: String?, error: ErrorInfo?) {
+                    continuation.resumeWithException(Exception(error?.description ?: "Unknown error uploading image"))
+                }
+                override fun onReschedule(requestId: String?, error: ErrorInfo?) {}
+            })
+            .dispatch()
     }
 
     suspend fun saveCourt(court: Court) {
         remoteDataSource.document(court.id).set(court).await()
         courtDao.insert(court)
+    }
+
+    private fun extractPublicId(url: String): String? {
+        try {
+            val uploadIndex = url.indexOf("/upload/")
+            if (uploadIndex == -1) return null
+            val afterUpload = url.substring(uploadIndex + "/upload/".length)
+            
+            // Remove version tag if present (e.g., v1234567890/)
+            val versionRegex = Regex("^v\\d+/")
+            val withoutVersion = afterUpload.replaceFirst(versionRegex, "")
+            
+            // Remove extension
+            val extensionIndex = withoutVersion.lastIndexOf('.')
+            return if (extensionIndex != -1) {
+                withoutVersion.substring(0, extensionIndex)
+            } else {
+                withoutVersion
+            }
+        } catch (e: Exception) {
+            return null
+        }
     }
 
     /**
@@ -212,11 +252,15 @@ class CourtRepository @Inject constructor(
         // 2. Delete from Room
         courtDao.deleteById(courtId)
 
-        // 3. Delete image from Firebase Storage if it exists
+        // 3. Delete image from Cloudinary if it exists
         if (imageUrl.isNotEmpty()) {
             try {
-                val storageRef = storage.getReferenceFromUrl(imageUrl)
-                storageRef.delete().await()
+                val publicId = extractPublicId(imageUrl)
+                if (publicId != null) {
+                    withContext(Dispatchers.IO) {
+                        MediaManager.get().getCloudinary().uploader().destroy(publicId, ObjectUtils.emptyMap())
+                    }
+                }
             } catch (e: Exception) {
                 // If the image is already gone or link is invalid, we proceed
                 e.printStackTrace()

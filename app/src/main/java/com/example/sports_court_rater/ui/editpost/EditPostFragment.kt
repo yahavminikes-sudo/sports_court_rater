@@ -24,6 +24,10 @@ import com.google.android.gms.location.LocationServices
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.io.File
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.example.sports_court_rater.databinding.BottomSheetImagePickerBinding
+import androidx.core.content.FileProvider
 
 @AndroidEntryPoint
 class EditPostFragment : Fragment() {
@@ -37,6 +41,20 @@ class EditPostFragment : Fragment() {
 
     private var selectedImageUri: Uri? = null
     private var currentSelectedSport: String = ""
+    private var latestTmpUri: Uri? = null
+
+    private val takePictureLauncher = registerForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { isSuccess ->
+        if (isSuccess) {
+            latestTmpUri?.let { uri ->
+                selectedImageUri = uri
+                binding.ivCourtImage.setImageURI(uri)
+                binding.ivCourtImage.visibility = View.VISIBLE
+                binding.placeholderContainer.visibility = View.GONE
+            }
+        }
+    }
 
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
@@ -60,7 +78,7 @@ class EditPostFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
 
         setupInitialData()
         setupListeners()
@@ -102,7 +120,7 @@ class EditPostFragment : Fragment() {
 
     private fun setupListeners() {
         binding.btnSelectImage.setOnClickListener {
-            pickImageLauncher.launch("image/*")
+            showImagePickerDialog()
         }
 
         binding.llBasketball.setOnClickListener {
@@ -139,6 +157,37 @@ class EditPostFragment : Fragment() {
         if (!findNavController().navigateUp()) {
             findNavController().navigate(R.id.homeFragment)
         }
+    }
+
+    private fun showImagePickerDialog() {
+        val bottomSheet = BottomSheetDialog(requireContext(), R.style.CustomBottomSheetDialogTheme)
+        val pickerBinding = BottomSheetImagePickerBinding.inflate(layoutInflater)
+        bottomSheet.setContentView(pickerBinding.root)
+
+        pickerBinding.btnCamera.setOnClickListener {
+            bottomSheet.dismiss()
+            takePhoto()
+        }
+
+        pickerBinding.btnGallery.setOnClickListener {
+            bottomSheet.dismiss()
+            pickImageLauncher.launch("image/*")
+        }
+
+        bottomSheet.show()
+    }
+
+    private fun takePhoto() {
+        val tmpFile = File.createTempFile("tmp_image_file", ".png", requireContext().cacheDir).apply {
+            createNewFile()
+            deleteOnExit()
+        }
+        latestTmpUri = FileProvider.getUriForFile(
+            requireContext(),
+            "${requireContext().packageName}.fileprovider",
+            tmpFile
+        )
+        takePictureLauncher.launch(latestTmpUri)
     }
 
     private fun updateSportSelectionUI(selectedSport: String) {
