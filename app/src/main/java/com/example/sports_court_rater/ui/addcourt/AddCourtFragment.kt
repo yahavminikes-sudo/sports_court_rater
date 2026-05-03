@@ -85,7 +85,7 @@ class AddCourtFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
 
         setupListeners()
         observeViewModel()
@@ -319,17 +319,32 @@ class AddCourtFragment : Fragment() {
             return
         }
 
-        fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
-            .addOnSuccessListener { location ->
-                if (location != null) {
-                    viewModel.setLocation(location.latitude, location.longitude)
-                } else {
-                    Toast.makeText(requireContext(), "Unable to fetch location. Try again.", Toast.LENGTH_SHORT).show()
+        try {
+            fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+                .addOnSuccessListener { location ->
+                    if (location != null) {
+                        viewModel.setLocation(location.latitude, location.longitude)
+                    } else {
+                        // Fallback to last location
+                        try {
+                            fusedLocationClient.lastLocation.addOnSuccessListener { lastLoc ->
+                                if (lastLoc != null) {
+                                    viewModel.setLocation(lastLoc.latitude, lastLoc.longitude)
+                                } else {
+                                    Toast.makeText(requireContext(), "Unable to fetch location. Try again.", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        } catch (e: SecurityException) {
+                            Toast.makeText(requireContext(), "Error fetching location: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }
-            }
-            .addOnFailureListener {
-                Toast.makeText(requireContext(), "Error fetching location: ${it.message}", Toast.LENGTH_SHORT).show()
-            }
+                .addOnFailureListener {
+                    Toast.makeText(requireContext(), "Error fetching location: ${it.message}", Toast.LENGTH_SHORT).show()
+                }
+        } catch (e: SecurityException) {
+            Toast.makeText(requireContext(), "Error fetching location: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onDestroyView() {
