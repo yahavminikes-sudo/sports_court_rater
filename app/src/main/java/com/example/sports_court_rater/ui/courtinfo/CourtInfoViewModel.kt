@@ -47,11 +47,15 @@ class CourtInfoViewModel @Inject constructor(
     private val _isCreator = MutableStateFlow(false)
     val isCreator: StateFlow<Boolean> = _isCreator.asStateFlow()
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     private val _deleteResult = MutableStateFlow<Result<Unit>?>(null)
     val deleteResult: StateFlow<Result<Unit>?> = _deleteResult.asStateFlow()
 
     fun loadCourtDetails(courtId: String) {
         viewModelScope.launch {
+            _isLoading.value = true
             val courtDetails = repository.getCourtById(courtId)
             if (courtDetails != null) {
                 _court.value = courtDetails
@@ -68,6 +72,7 @@ class CourtInfoViewModel @Inject constructor(
             } else {
                 _error.value = "Court not found"
             }
+            _isLoading.value = false
         }
     }
 

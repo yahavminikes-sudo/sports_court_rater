@@ -45,7 +45,15 @@ class SearchFragment : Fragment() {
 
         setupRecyclerView()
         setupListeners()
+        setupSwipeToRefresh()
         observeViewModel()
+    }
+
+    private fun setupSwipeToRefresh() {
+        binding.swipeRefresh.setOnRefreshListener {
+            viewModel.refresh()
+        }
+        binding.swipeRefresh.setColorSchemeResources(R.color.primary_green)
     }
 
     private fun setupRecyclerView() {
@@ -93,6 +101,11 @@ class SearchFragment : Fragment() {
                     viewModel.filteredCourts.collect { courts ->
                         adapter.submitList(courts)
                         binding.tvResultsCount.text = getString(R.string.courts_found_format, courts.size)
+                    }
+                }
+                launch {
+                    viewModel.isRefreshing.collect { isRefreshing ->
+                        binding.swipeRefresh.isRefreshing = isRefreshing
                     }
                 }
             }

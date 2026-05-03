@@ -6,12 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.sports_court_rater.Court
 import com.example.sports_court_rater.data.CourtRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,6 +24,19 @@ class HomeViewModel @Inject constructor(
     val sortType: StateFlow<SortType> = _sortType.asStateFlow()
 
     private val _userLocation = MutableStateFlow<Pair<Double, Double>?>(null)
+    private val _isRefreshing = MutableStateFlow(true)
+
+    val isLoading: StateFlow<Boolean> = combine(
+        _isRefreshing,
+        _sortType,
+        _userLocation
+    ) { refreshing, sort, location ->
+        refreshing || (sort == SortType.NEAR && location == null)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = true
+    )
 
     val courts: StateFlow<List<Court>> = combine(
         repository.getAllCourts(),
@@ -35,32 +44,30 @@ class HomeViewModel @Inject constructor(
         _userLocation
     ) { courts, sortType, location ->
         when (sortType) {
-            SortType.RATING -> courts.sortedByDescending {
-                if (it.averageRating > 0) it.averageRating else it.rating
-            }
+            SortType.RATING -> courts.sortedByDescending { it.averageRating }
             SortType.NEW -> courts.sortedByDescending { it.date }
-            SortType.NEAR -> if (location != null) {
-                courts.sortedBy { court ->
-                    val results = FloatArray(1)
-                    Location.distanceBetween(
-                        location.first, location.second,
-                        court.latitude, court.longitude,
-                        results
-                    )
-                    results[0]
+            SortType.NEAR -> {
+                if (location == null) courts
+                else {
+                    courts.map { court ->
+                        val results = FloatArray(1)
+                        Location.distanceBetween(
+                            location.first, location.second,
+                            court.latitude, court.longitude,
+                            results
+                        )
+                        court to results[0]
+                    }.sortedBy { it.second }.map { it.first }
                 }
-            } else {
-                courts
             }
         }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
-
-    private val _isLoading = MutableStateFlow(true) // Start as true to show skeleton immediately
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    }
+        .flowOn(Dispatchers.Default)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     init {
         refreshCourts()
@@ -76,13 +83,13 @@ class HomeViewModel @Inject constructor(
 
     fun refreshCourts() {
         viewModelScope.launch {
-            _isLoading.value = true
+            _isRefreshing.value = true
             try {
                 repository.refreshCourts()
             } catch (e: Exception) {
-                // Handle error if needed
+                // UI will handle empty state or errors via the courts flow
             } finally {
-                _isLoading.value = false
+                _isRefreshing.value = false
             }
         }
     }
