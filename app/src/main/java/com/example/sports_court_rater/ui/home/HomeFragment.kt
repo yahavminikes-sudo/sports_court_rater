@@ -64,7 +64,7 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
 
         setupRecyclerView()
         setupSortButtons()
@@ -137,29 +137,42 @@ class HomeFragment : Fragment() {
             return
         }
 
-        // Use HIGH_ACCURACY and fallback to lastLocation to solve the null location issue
-        fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
-            .addOnSuccessListener { location ->
-                if (location != null) {
-                    viewModel.setUserLocation(location.latitude, location.longitude)
-                    viewModel.setSortType(SortType.NEAR)
-                } else {
-                    // Try last location if getCurrentLocation is null
-                    fusedLocationClient.lastLocation.addOnSuccessListener { lastLoc ->
-                        if (lastLoc != null) {
-                            viewModel.setUserLocation(lastLoc.latitude, lastLoc.longitude)
-                            viewModel.setSortType(SortType.NEAR)
-                        } else {
-                            Toast.makeText(requireContext(), R.string.location_gps_error, Toast.LENGTH_SHORT).show()
+        try {
+            // Use HIGH_ACCURACY and fallback to lastLocation to solve the null location issue
+            fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+                .addOnSuccessListener { location ->
+                    if (location != null) {
+                        viewModel.setUserLocation(location.latitude, location.longitude)
+                        viewModel.setSortType(SortType.NEAR)
+                    } else {
+                        // Try last location if getCurrentLocation is null
+                        try {
+                            fusedLocationClient.lastLocation.addOnSuccessListener { lastLoc ->
+                                if (lastLoc != null) {
+                                    viewModel.setUserLocation(lastLoc.latitude, lastLoc.longitude)
+                                    viewModel.setSortType(SortType.NEAR)
+                                } else {
+                                    Toast.makeText(requireContext(), R.string.location_gps_error, Toast.LENGTH_SHORT).show()
+                                    viewModel.setSortType(SortType.RATING)
+                                }
+                            }.addOnFailureListener {
+                                Toast.makeText(requireContext(), getString(R.string.error_fetching_location, it.message), Toast.LENGTH_SHORT).show()
+                                viewModel.setSortType(SortType.RATING)
+                            }
+                        } catch (e: SecurityException) {
+                            Toast.makeText(requireContext(), getString(R.string.error_fetching_location, e.message), Toast.LENGTH_SHORT).show()
                             viewModel.setSortType(SortType.RATING)
                         }
                     }
                 }
-            }
-            .addOnFailureListener {
-                Toast.makeText(requireContext(), getString(R.string.error_fetching_location, it.message), Toast.LENGTH_SHORT).show()
-                viewModel.setSortType(SortType.RATING)
-            }
+                .addOnFailureListener {
+                    Toast.makeText(requireContext(), getString(R.string.error_fetching_location, it.message), Toast.LENGTH_SHORT).show()
+                    viewModel.setSortType(SortType.RATING)
+                }
+        } catch (e: SecurityException) {
+            Toast.makeText(requireContext(), getString(R.string.error_fetching_location, e.message), Toast.LENGTH_SHORT).show()
+            viewModel.setSortType(SortType.RATING)
+        }
     }
 
     private fun observeViewModel() {

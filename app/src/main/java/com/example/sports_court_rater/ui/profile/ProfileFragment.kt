@@ -31,6 +31,11 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import android.net.Uri
+import androidx.activity.result.contract.ActivityResultContracts
+import java.io.File
+import androidx.core.content.FileProvider
+import com.example.sports_court_rater.databinding.BottomSheetImagePickerBinding
 
 @AndroidEntryPoint
 class ProfileFragment : Fragment() {
@@ -43,6 +48,25 @@ class ProfileFragment : Fragment() {
     private lateinit var reviewAdapter: ReviewAdapter
 
     private var isShowingCourts = true
+    private var latestTmpUri: Uri? = null
+
+    private val pickImageLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            viewModel.updateProfile(viewModel.currentUser?.displayName ?: "משתמש", it)
+        }
+    }
+
+    private val takePictureLauncher = registerForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { isSuccess ->
+        if (isSuccess) {
+            latestTmpUri?.let { uri ->
+                viewModel.updateProfile(viewModel.currentUser?.displayName ?: "משתמש", uri)
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -94,7 +118,7 @@ class ProfileFragment : Fragment() {
         }
 
         binding.btnChangePhoto.setOnClickListener {
-            // Handle change photo logic
+            showImagePickerDialog()
         }
         
         updateTabUI()
@@ -141,6 +165,37 @@ class ProfileFragment : Fragment() {
         }
 
         dialog.show()
+    }
+
+    private fun showImagePickerDialog() {
+        val bottomSheet = BottomSheetDialog(requireContext(), R.style.CustomBottomSheetDialogTheme)
+        val pickerBinding = BottomSheetImagePickerBinding.inflate(layoutInflater)
+        bottomSheet.setContentView(pickerBinding.root)
+
+        pickerBinding.btnCamera.setOnClickListener {
+            bottomSheet.dismiss()
+            takePhoto()
+        }
+
+        pickerBinding.btnGallery.setOnClickListener {
+            bottomSheet.dismiss()
+            pickImageLauncher.launch("image/*")
+        }
+
+        bottomSheet.show()
+    }
+
+    private fun takePhoto() {
+        val tmpFile = File.createTempFile("tmp_image_file", ".png", requireContext().cacheDir).apply {
+            createNewFile()
+            deleteOnExit()
+        }
+        latestTmpUri = FileProvider.getUriForFile(
+            requireContext(),
+            "${requireContext().packageName}.fileprovider",
+            tmpFile
+        )
+        takePictureLauncher.launch(latestTmpUri)
     }
 
     private fun updateTabUI() {
