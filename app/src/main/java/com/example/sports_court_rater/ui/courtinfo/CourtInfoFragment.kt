@@ -117,8 +117,8 @@ class CourtInfoFragment : Fragment() {
 
     private fun showDeleteReviewConfirmation(review: Review) {
         val dialogBinding = DialogConfirmDeleteBinding.inflate(layoutInflater)
-        dialogBinding.tvDialogTitle.text = "מחק דירוג"
-        dialogBinding.tvMessage.text = "האם אתה בטוח שברצונך למחוק את הדירוג? פעולה זו לא ניתנת לביטול."
+        dialogBinding.tvDialogTitle.text = getString(R.string.delete_dialog_title)
+        dialogBinding.tvMessage.text = getString(R.string.delete_dialog_message)
 
         val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.TransparentDialog)
             .setView(dialogBinding.root)
@@ -175,7 +175,7 @@ class CourtInfoFragment : Fragment() {
                 }
                 dialog.dismiss()
             } else {
-                Toast.makeText(requireContext(), "אנא בחר דירוג", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), R.string.select_rating_error, Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -270,10 +270,10 @@ class CourtInfoFragment : Fragment() {
                 launch {
                     viewModel.deleteResult.collect { result ->
                         result?.onSuccess {
-                            Toast.makeText(requireContext(), "המגרש נמחק בהצלחה", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), R.string.court_delete_success, Toast.LENGTH_SHORT).show()
                             findNavController().navigateUp()
                         }?.onFailure {
-                            Toast.makeText(requireContext(), "המחיקה נכשלה: ${it.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), getString(R.string.court_delete_error, it.message), Toast.LENGTH_SHORT).show()
                             viewModel.resetDeleteResult()
                         }
                     }

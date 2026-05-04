@@ -13,6 +13,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.example.sports_court_rater.R
 import com.example.sports_court_rater.databinding.FragmentSignUpBinding
 import com.example.sports_court_rater.ui.AuthState
 import dagger.hilt.android.AndroidEntryPoint
@@ -87,11 +88,11 @@ class SignUpFragment : Fragment() {
 
     private fun translateError(message: String): String {
         return when {
-            message.contains("email address is already in use", ignoreCase = true) -> "כתובת האימייל כבר בשימוש"
-            message.contains("badly formatted", ignoreCase = true) -> "כתובת אימייל לא תקינה"
-            message.contains("network error", ignoreCase = true) -> "שגיאת רשת, אנא נסה שוב מאוחר יותר"
-            message.contains("password", ignoreCase = true) -> "הסיסמה חלשה מדי או לא תקינה"
-            else -> "ההרשמה נכשלה: $message"
+            message.contains("email address is already in use", ignoreCase = true) -> getString(R.string.error_email_in_use)
+            message.contains("badly formatted", ignoreCase = true) -> getString(R.string.error_bad_email)
+            message.contains("network error", ignoreCase = true) -> getString(R.string.error_network)
+            message.contains("password", ignoreCase = true) -> getString(R.string.error_weak_password)
+            else -> getString(R.string.error_signup_failed, message)
         }
     }
 

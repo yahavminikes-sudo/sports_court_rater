@@ -45,7 +45,7 @@ class AddCourtFragment : Fragment() {
                 getCurrentLocation()
             }
             else -> {
-                Toast.makeText(requireContext(), "Location permission denied", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), R.string.location_permission_denied, Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -135,7 +135,7 @@ class AddCourtFragment : Fragment() {
             rating == 0f -> {
                 Toast.makeText(
                     requireContext(),
-                    getString(R.string.rating_label_required),
+                    R.string.rating_label_required,
                     Toast.LENGTH_SHORT
                 ).show()
             }
@@ -181,7 +181,7 @@ class AddCourtFragment : Fragment() {
                             binding.progressBar.visibility = View.GONE
                             Toast.makeText(
                                 requireContext(),
-                                getString(R.string.court_published_success),
+                                R.string.court_published_success,
                                 Toast.LENGTH_SHORT
                             ).show()
 
@@ -195,7 +195,7 @@ class AddCourtFragment : Fragment() {
                         is AddCourtViewModel.AddCourtState.Error -> {
                             binding.progressBar.visibility = View.GONE
                             binding.btnPostCourt.isEnabled = true
-                            Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), getString(R.string.action_failed, state.message), Toast.LENGTH_SHORT).show()
                         }
                         is AddCourtViewModel.AddCourtState.Idle -> {
                             binding.progressBar.visibility = View.GONE
@@ -277,11 +277,11 @@ class AddCourtFragment : Fragment() {
                 if (location != null) {
                     viewModel.setLocation(location.latitude, location.longitude)
                 } else {
-                    Toast.makeText(requireContext(), "Unable to fetch location. Try again.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), R.string.location_gps_error, Toast.LENGTH_SHORT).show()
                 }
             }
             .addOnFailureListener {
-                Toast.makeText(requireContext(), "Error fetching location: ${it.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.error_fetching_location, it.message), Toast.LENGTH_SHORT).show()
             }
     }
 

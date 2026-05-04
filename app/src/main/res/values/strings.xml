@@ -100,8 +100,32 @@
     <string name="profile_edit_name_dialog_title">עדכון שם</string>
     <string name="save_button">שמור</string>
 
-    <!-- Court Published Success Message -->
+    <!-- Toasts and Messages -->
     <string name="court_published_success">המגרש פורסם בהצלחה!</string>
+    <string name="location_permission_denied">ההרשאה למיקום נדחתה</string>
+    <string name="error_fetching_location">שגיאה בקבלת מיקום: %s</string>
+    <string name="location_gps_error">לא ניתן לקבל מיקום. וודא שה-GPS פועל.</string>
+    <string name="court_name_required">נא להזין שם מגרש</string>
+    <string name="update_success">עודכן בהצלחה</string>
+    <string name="select_rating_error">אנא בחר דירוג</string>
+    <string name="court_delete_success">המגרש נמחק בהצלחה</string>
+    <string name="court_delete_error">המחיקה נכשלה: %s</string>
+    <string name="action_failed">הפעולה נכשלה: %s</string>
+    <string name="enter_name_error">נא להזין שם</string>
+    <string name="update_name_error">עדכון השם נכשל: %s</string>
+    <string name="update_name_success">השם עודכן בהצלחה</string>
+    <string name="action_success">הפעולה בוצעה בהצלחה</string>
+    <string name="location_fetch_error">שגיאה בקבלת מיקום. נסה שוב.</string>
+
+    <!-- Auth Errors -->
+    <string name="error_invalid_credentials">אימייל או סיסמה לא נכונים</string>
+    <string name="error_network">שגיאת רשת, אנא נסה שוב מאוחר יותר</string>
+    <string name="error_too_many_requests">יותר מדי ניסיונות כושלים, אנא נסה שוב מאוחר יותר</string>
+    <string name="error_login_failed">ההתחברות נכשלה: %s</string>
+    <string name="error_email_in_use">כתובת האימייל כבר בשימוש</string>
+    <string name="error_bad_email">כתובת אימייל לא תקינה</string>
+    <string name="error_weak_password">הסיסמה חלשה מדי או לא תקינה</string>
+    <string name="error_signup_failed">ההרשמה נכשלה: %s</string>
 
     <!-- Dialogs -->
     <string name="delete_dialog_title">מחק דירוג</string>

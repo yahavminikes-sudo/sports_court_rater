@@ -13,6 +13,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.example.sports_court_rater.R
 import com.example.sports_court_rater.databinding.FragmentLoginBinding
 import com.example.sports_court_rater.ui.AuthState
 import dagger.hilt.android.AndroidEntryPoint
@@ -90,12 +91,12 @@ class LoginFragment : Fragment() {
             message.contains("wrong-password", ignoreCase = true) ||
             message.contains("user-not-found", ignoreCase = true) ||
             message.contains("no user", ignoreCase = true) ||
-            message.contains("incorrect, malformed or has expired", ignoreCase = true) -> "אימייל או סיסמה לא נכונים"
-            message.contains("network error", ignoreCase = true) -> "שגיאת רשת, אנא נסה שוב מאוחר יותר"
+            message.contains("incorrect, malformed or has expired", ignoreCase = true) -> getString(R.string.error_invalid_credentials)
+            message.contains("network error", ignoreCase = true) -> getString(R.string.error_network)
             message.contains("too many requests", ignoreCase = true) ||
             message.contains("blocked all requests", ignoreCase = true) ||
-            message.contains("unusual activity", ignoreCase = true) -> "יותר מדי ניסיונות כושלים, אנא נסה שוב מאוחר יותר"
-            else -> "ההתחברות נכשלה: $message"
+            message.contains("unusual activity", ignoreCase = true) -> getString(R.string.error_too_many_requests)
+            else -> getString(R.string.error_login_failed, message)
         }
     }
 

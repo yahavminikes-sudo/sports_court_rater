@@ -132,7 +132,7 @@ class ProfileFragment : Fragment() {
                 viewModel.updateDisplayName(newName)
                 dialog.dismiss()
             } else {
-                Toast.makeText(requireContext(), "נא להזין שם", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), R.string.enter_name_error, Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -256,7 +256,7 @@ class ProfileFragment : Fragment() {
                 viewModel.updateReview(review.id, rating, comment)
                 dialog.dismiss()
             } else {
-                Toast.makeText(requireContext(), "אנא בחר דירוג", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), R.string.select_rating_error, Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -339,10 +339,10 @@ class ProfileFragment : Fragment() {
                     viewModel.updateResult.collect { result ->
                         result?.onSuccess {
                             refreshProfileHeader()
-                            Toast.makeText(requireContext(), "השם עודכן בהצלחה", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), R.string.update_name_success, Toast.LENGTH_SHORT).show()
                             viewModel.resetUpdateResult()
                         }?.onFailure {
-                            Toast.makeText(requireContext(), "עדכון השם נכשל: ${it.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), getString(R.string.update_name_error, it.message), Toast.LENGTH_SHORT).show()
                             viewModel.resetUpdateResult()
                         }
                     }
@@ -350,10 +350,10 @@ class ProfileFragment : Fragment() {
                 launch {
                     viewModel.deleteResult.collect { result ->
                         result?.onSuccess {
-                            Toast.makeText(requireContext(), "הפעולה בוצעה בהצלחה", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), R.string.action_success, Toast.LENGTH_SHORT).show()
                             viewModel.resetDeleteResult()
                         }?.onFailure {
-                            Toast.makeText(requireContext(), "הפעולה נכשלה: ${it.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), getString(R.string.action_failed, it.message), Toast.LENGTH_SHORT).show()
                             viewModel.resetDeleteResult()
                         }
                     }
