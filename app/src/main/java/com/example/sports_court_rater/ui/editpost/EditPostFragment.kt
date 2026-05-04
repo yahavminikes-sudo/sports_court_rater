@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.TooltipCompat
@@ -144,7 +143,7 @@ class EditPostFragment : Fragment() {
             if (name.isNotEmpty()) {
                 viewModel.updatePost(name, currentSelectedSport, rating, description, selectedImageUri)
             } else {
-                Toast.makeText(requireContext(), "נא להזין שם מגרש", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), R.string.court_name_required, Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -223,13 +222,13 @@ class EditPostFragment : Fragment() {
                         }
                         is EditPostViewModel.EditPostState.Success -> {
                             binding.progressBar.visibility = View.GONE
-                            Toast.makeText(requireContext(), "עודכן בהצלחה", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), R.string.update_success, Toast.LENGTH_SHORT).show()
                             findNavController().popBackStack()
                         }
                         is EditPostViewModel.EditPostState.Error -> {
                             binding.progressBar.visibility = View.GONE
                             binding.btnPostCourt.isEnabled = true
-                            Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), getString(R.string.action_failed, state.message), Toast.LENGTH_SHORT).show()
                         }
                         else -> {
                             binding.progressBar.visibility = View.GONE

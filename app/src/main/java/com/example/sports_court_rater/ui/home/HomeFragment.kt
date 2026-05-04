@@ -46,7 +46,7 @@ class HomeFragment : Fragment() {
                 getCurrentLocation()
             }
             else -> {
-                Toast.makeText(requireContext(), "ההרשאה למיקום נדחתה", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), R.string.location_permission_denied, Toast.LENGTH_SHORT).show()
                 // Revert to RATING if permission denied
                 viewModel.setSortType(SortType.RATING)
             }
@@ -152,25 +152,25 @@ class HomeFragment : Fragment() {
                                     viewModel.setUserLocation(lastLoc.latitude, lastLoc.longitude)
                                     viewModel.setSortType(SortType.NEAR)
                                 } else {
-                                    Toast.makeText(requireContext(), "לא ניתן לקבל מיקום. וודא שה-GPS פועל.", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(requireContext(), R.string.location_gps_error, Toast.LENGTH_SHORT).show()
                                     viewModel.setSortType(SortType.RATING)
                                 }
                             }.addOnFailureListener {
-                                Toast.makeText(requireContext(), "שגיאה בקבלת מיקום: ${it.message}", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(requireContext(), getString(R.string.error_fetching_location, it.message), Toast.LENGTH_SHORT).show()
                                 viewModel.setSortType(SortType.RATING)
                             }
                         } catch (e: SecurityException) {
-                            Toast.makeText(requireContext(), "שגיאה בקבלת מיקום: ${e.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), getString(R.string.error_fetching_location, e.message), Toast.LENGTH_SHORT).show()
                             viewModel.setSortType(SortType.RATING)
                         }
                     }
                 }
                 .addOnFailureListener {
-                    Toast.makeText(requireContext(), "שגיאה בקבלת מיקום: ${it.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), getString(R.string.error_fetching_location, it.message), Toast.LENGTH_SHORT).show()
                     viewModel.setSortType(SortType.RATING)
                 }
         } catch (e: SecurityException) {
-            Toast.makeText(requireContext(), "שגיאה בקבלת מיקום: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.error_fetching_location, e.message), Toast.LENGTH_SHORT).show()
             viewModel.setSortType(SortType.RATING)
         }
     }
