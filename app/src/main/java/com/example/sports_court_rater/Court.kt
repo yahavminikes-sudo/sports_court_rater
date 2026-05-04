@@ -16,8 +16,6 @@ data class Court(
     @PrimaryKey 
     val id: String = "",
     val creatorId: String = "",
-    val creatorName: String = "",
-    val creatorImageUrl: String = "",
     val courtName: String = "",
     val sportType: String = "",
     val latitude: Double = 0.0,
@@ -37,4 +35,14 @@ data class Court(
     @get:Exclude
     @IgnoredOnParcel
     var averageRating: Float = 0f
+
+    @Ignore
+    @get:Exclude
+    @IgnoredOnParcel
+    var creatorName: String = ""
+
+    @Ignore
+    @get:Exclude
+    @IgnoredOnParcel
+    var creatorImageUrl: String = ""
 }

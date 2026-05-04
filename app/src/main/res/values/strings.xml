@@ -114,6 +114,7 @@
     <string name="enter_name_error">נא להזין שם</string>
     <string name="update_name_error">עדכון השם נכשל: %s</string>
     <string name="update_name_success">השם עודכן בהצלחה</string>
+    <string name="profile_picture_updated">התמונה עודכנה בהצלחה</string>
     <string name="action_success">הפעולה בוצעה בהצלחה</string>
     <string name="location_fetch_error">שגיאה בקבלת מיקום. נסה שוב.</string>
 

@@ -1,10 +1,12 @@
 package com.example.sports_court_rater
 
-import kotlinx.serialization.Serializable
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
-@Serializable
+@Entity(tableName = "users")
 data class User(
-    val userId: String,
-    val displayName: String,
-    val profilePictureUrl: String
+    @PrimaryKey
+    val userId: String = "",
+    val displayName: String = "",
+    val profilePictureUrl: String = ""
 )

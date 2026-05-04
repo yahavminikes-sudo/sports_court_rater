@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sports_court_rater.Court
 import com.example.sports_court_rater.Review
+import com.example.sports_court_rater.User
 import com.example.sports_court_rater.data.CourtRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -33,7 +34,6 @@ class ProfileViewModel @Inject constructor(
     private val _userReviews = MutableStateFlow<List<Review>>(emptyList())
     val userReviews: StateFlow<List<Review>> = _userReviews.asStateFlow()
 
-    // Start as true to prevent empty state flicker on first load
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
@@ -50,7 +50,6 @@ class ProfileViewModel @Inject constructor(
     fun loadUserData() {
         val userId = currentUser?.uid ?: return
         viewModelScope.launch {
-            // Only show skeleton if we have no data yet
             if (_userCourts.value.isEmpty() && _userReviews.value.isEmpty()) {
                 _isLoading.value = true
             }
@@ -62,7 +61,7 @@ class ProfileViewModel @Inject constructor(
                 _userCourts.value = courts
                 _userReviews.value = reviews
             } catch (e: Exception) {
-                // Error handling could be added here
+                // Error handling
             } finally {
                 _isLoading.value = false
             }
@@ -90,11 +89,12 @@ class ProfileViewModel @Inject constructor(
                 }
                 user.updateProfile(profileUpdates).await()
 
-                val userUpdates = mapOf(
-                    "displayName" to newName,
-                    "profilePictureUrl" to (photoUrl ?: "")
+                val updatedUser = User(
+                    userId = userId,
+                    displayName = newName,
+                    profilePictureUrl = photoUrl ?: ""
                 )
-                firestore.collection("users").document(userId).update(userUpdates).await()
+                repository.saveUser(updatedUser)
 
                 _updateResult.value = Result.success(Unit)
                 loadUserData()
