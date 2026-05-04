@@ -197,9 +197,9 @@ class CourtRepository @Inject constructor(
         firestore.collection("reviews").document(review.id).delete().await()
     }
 
-    suspend fun uploadImage(uri: Uri): String = suspendCancellableCoroutine { continuation ->
+    suspend fun uploadImage(uri: Uri, folder: String = "court_images"): String = suspendCancellableCoroutine { continuation ->
         MediaManager.get().upload(uri)
-            .option("folder", "court_images")
+            .option("folder", folder)
             .callback(object : UploadCallback {
                 override fun onStart(requestId: String?) {}
                 override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
