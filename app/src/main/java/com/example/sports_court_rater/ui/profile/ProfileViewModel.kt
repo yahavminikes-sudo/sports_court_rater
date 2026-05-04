@@ -10,7 +10,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,8 +22,7 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val repository: CourtRepository,
     private val auth: FirebaseAuth,
-    private val firestore: FirebaseFirestore,
-    private val storage: FirebaseStorage
+    private val firestore: FirebaseFirestore
 ) : ViewModel() {
 
     val currentUser: FirebaseUser? get() = auth.currentUser
@@ -81,9 +79,7 @@ class ProfileViewModel @Inject constructor(
                 var photoUrl = user.photoUrl?.toString()
 
                 if (newPhotoUri != null) {
-                    val storageRef = storage.reference.child("profile_pics/$userId.jpg")
-                    storageRef.putFile(newPhotoUri).await()
-                    photoUrl = storageRef.downloadUrl.await().toString()
+                    photoUrl = repository.uploadImage(newPhotoUri, "profile_pics")
                 }
 
                 val profileUpdates = userProfileChangeRequest {
