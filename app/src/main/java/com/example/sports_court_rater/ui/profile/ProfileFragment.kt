@@ -87,7 +87,7 @@ class ProfileFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        viewModel.loadUserData() // Refresh data when returning to profile
+        viewModel.loadUserData()
     }
 
     private fun setupUI() {
@@ -426,7 +426,7 @@ class ProfileFragment : Fragment() {
             binding.llSkeletonContainer.stopSkeletonAnimation()
             binding.rvMyPosts.crossFade(true)
             binding.llSkeletonContainer.crossFade(false)
-            updateTabUI() // Re-check empty state visibility
+            updateTabUI()
         }
     }
 

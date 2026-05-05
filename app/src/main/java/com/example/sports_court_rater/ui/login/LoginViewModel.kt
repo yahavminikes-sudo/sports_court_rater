@@ -28,7 +28,6 @@ class LoginViewModel @Inject constructor(
             val result = authRepository.loginUser(email, password)
             _loginState.value = result.fold(
                 onSuccess = { user ->
-                    // Fetch user details from Firestore and cache them
                     courtRepository.getUserById(user.uid)
                     AuthState.Success(user)
                 },

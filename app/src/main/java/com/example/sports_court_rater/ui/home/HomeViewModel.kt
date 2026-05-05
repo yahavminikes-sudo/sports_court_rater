@@ -87,7 +87,6 @@ class HomeViewModel @Inject constructor(
             try {
                 repository.refreshCourts()
             } catch (e: Exception) {
-                // UI will handle empty state or errors via the courts flow
             } finally {
                 _isRefreshing.value = false
             }

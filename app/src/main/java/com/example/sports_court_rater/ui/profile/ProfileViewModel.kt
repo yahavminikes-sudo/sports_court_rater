@@ -66,7 +66,7 @@ class ProfileViewModel @Inject constructor(
                 _userCourts.value = courts
                 _userReviews.value = reviews
             } catch (e: Exception) {
-                // Error handling
+
             } finally {
                 _isLoading.value = false
             }

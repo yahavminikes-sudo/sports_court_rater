@@ -37,7 +37,6 @@ class SignUpViewModel @Inject constructor(
                         }
                         user.updateProfile(profileUpdates).await()
                         
-                        // Save to users collection and local Room
                         val newUser = User(
                             userId = user.uid,
                             displayName = displayName,

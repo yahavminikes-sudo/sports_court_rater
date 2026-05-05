@@ -21,7 +21,6 @@ class EditPostViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    // 1. Receives existing Court object via safeArgs
     val court: Court? = savedStateHandle["court"]
 
     private val _latitude = MutableLiveData<Double?>(court?.latitude)
@@ -44,7 +43,6 @@ class EditPostViewModel @Inject constructor(
     val uiState: StateFlow<EditPostState> = _uiState.asStateFlow()
 
     init {
-        // Load initial location name
         court?.let {
             setLocation(it.latitude, it.longitude)
         }
@@ -58,9 +56,6 @@ class EditPostViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Updates the existing court post.
-     */
     fun updatePost(
         newName: String,
         newSport: String,
@@ -79,7 +74,6 @@ class EditPostViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = EditPostState.Loading
             try {
-                // If newImageUri is not null, upload the new image
                 val imageUrl = if (newImageUri != null) {
                     courtRepository.uploadImage(newImageUri)
                 } else {
@@ -104,17 +98,12 @@ class EditPostViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Deletes the post and its associated image from Firebase.
-     */
     fun deletePost(postId: String, imageUrl: String) {
         viewModelScope.launch {
             _uiState.value = EditPostState.Loading
             try {
-                // 1. & 2. Delete from remote Firebase and Storage via Repository
                 courtRepository.deleteCourt(postId, imageUrl)
                 
-                // 3. Update UI state
                 _uiState.value = EditPostState.Success
             } catch (e: Exception) {
                 _uiState.value = EditPostState.Error(e.message ?: "Failed to delete court.")

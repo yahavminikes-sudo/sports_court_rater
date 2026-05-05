@@ -47,7 +47,6 @@ class HomeFragment : Fragment() {
             }
             else -> {
                 Toast.makeText(requireContext(), R.string.location_permission_denied, Toast.LENGTH_SHORT).show()
-                // Revert to RATING if permission denied
                 viewModel.setSortType(SortType.RATING)
             }
         }
@@ -138,14 +137,12 @@ class HomeFragment : Fragment() {
         }
 
         try {
-            // Use HIGH_ACCURACY and fallback to lastLocation to solve the null location issue
             fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
                 .addOnSuccessListener { location ->
                     if (location != null) {
                         viewModel.setUserLocation(location.latitude, location.longitude)
                         viewModel.setSortType(SortType.NEAR)
                     } else {
-                        // Try last location if getCurrentLocation is null
                         try {
                             fusedLocationClient.lastLocation.addOnSuccessListener { lastLoc ->
                                 if (lastLoc != null) {

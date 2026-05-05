@@ -37,21 +37,14 @@ class CourtRepository @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
 
-    /**
-     * Fetches the latest list of Court from Firebase (forcing server fetch)
-     * and inserts them into the Room database after clearing the local cache.
-     */
     suspend fun refreshCourts() {
         try {
-            // Force fetch from server to bypass Firebase's internal cache
             val snapshot = remoteDataSource.get(Source.SERVER).await()
             val courts = snapshot.toObjects(Court::class.java)
 
-            // Single source of truth: Update Room
             courtDao.deleteAll()
             courtDao.insertAll(courts)
             
-            // Also refresh users to ensure we have creator info
             val userIds = courts.map { it.creatorId }.distinct()
             for (userId in userIds) {
                 fetchAndCacheUser(userId)
@@ -74,10 +67,6 @@ class CourtRepository @Inject constructor(
         }
     }
 
-    /**
-     * Returns the data strictly from the Room DAO (local cache).
-     * Enriches courts with location names, average ratings, and creator info on the fly.
-     */
     fun getAllCourts(): Flow<List<Court>> {
         return courtDao.getAll().map { courts ->
             for (court in courts) {

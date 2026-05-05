@@ -118,7 +118,6 @@ class AddCourtFragment : Fragment() {
             handleBackNavigation()
         }
 
-        // Add court location can be manually edited
         binding.etLocation.isFocusable = true
         binding.etLocation.isFocusableInTouchMode = true
         binding.etLocation.isClickable = true
@@ -166,7 +165,6 @@ class AddCourtFragment : Fragment() {
         val locationText = binding.etLocation.text.toString().trim()
         val rating = binding.ratingBar.rating
 
-        // Reset previous errors
         binding.etCourtName.error = null
         binding.etLocation.error = null
 
@@ -261,7 +259,6 @@ class AddCourtFragment : Fragment() {
         val selectedTextColor = ContextCompat.getColor(requireContext(), R.color.white)
         val unselectedTextColor = ContextCompat.getColor(requireContext(), R.color.gray_700)
 
-        // Reset all
         binding.llBasketball.setBackgroundResource(unselectedBg)
         binding.tvBasketballLabel.setTextColor(unselectedTextColor)
 
@@ -271,7 +268,6 @@ class AddCourtFragment : Fragment() {
         binding.llTennis.setBackgroundResource(unselectedBg)
         binding.tvTennisLabel.setTextColor(unselectedTextColor)
 
-        // Apply selected
         when (selectedSport) {
             getString(R.string.basketball) -> {
                 binding.llBasketball.setBackgroundResource(selectedBg)
@@ -325,7 +321,6 @@ class AddCourtFragment : Fragment() {
                     if (location != null) {
                         viewModel.setLocation(location.latitude, location.longitude)
                     } else {
-                        // Fallback to last location
                         try {
                             fusedLocationClient.lastLocation.addOnSuccessListener { lastLoc ->
                                 if (lastLoc != null) {

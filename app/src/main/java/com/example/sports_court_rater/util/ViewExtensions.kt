@@ -13,7 +13,6 @@ fun ViewGroup.startSkeletonAnimation() {
                 applyPulse(view.getChildAt(i))
             }
         } else if (view.id != View.NO_ID) {
-            // Check if it's a skeleton view (typically has background or is a View)
             view.startAnimation(pulseAnimation)
         }
     }
@@ -32,9 +31,6 @@ fun ViewGroup.stopSkeletonAnimation() {
     clearAnims(this)
 }
 
-/**
- * Cross-fade visibility transition.
- */
 fun View.crossFade(show: Boolean, duration: Long = 300) {
     if (show) {
         this.alpha = 0f
