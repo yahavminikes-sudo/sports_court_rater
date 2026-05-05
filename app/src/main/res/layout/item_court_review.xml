@@ -14,17 +14,26 @@
         android:background="#EEEEEE"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/ivReviewerImage"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/mcvReviewerImage"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginTop="12dp"
-        android:background="@drawable/bg_circle_light_grey"
-        android:contentDescription="@string/creator_image_desc"
-        android:padding="4dp"
-        android:src="@drawable/ic_person"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="0dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/divider" />
+        app:layout_constraintTop_toBottomOf="@id/divider">
+
+        <ImageView
+            android:id="@+id/ivReviewerImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_circle_light_grey"
+            android:contentDescription="@string/creator_image_desc"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_person" />
+    </com.google.android.material.card.MaterialCardView>
 
     <TextView
         android:id="@+id/tvReviewerName"
@@ -35,9 +44,9 @@
         android:maxLines="1"
         android:textColor="#000000"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@id/ivReviewerImage"
+        app:layout_constraintEnd_toStartOf="@id/mcvReviewerImage"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/ivReviewerImage"
+        app:layout_constraintTop_toTopOf="@id/mcvReviewerImage"
         tools:text="מיכל לוי" />
 
     <RatingBar

@@ -305,6 +305,16 @@ class CourtInfoFragment : Fragment() {
                         user?.let {
                             binding.tvCreatorName.text = it.displayName
                             TooltipCompat.setTooltipText(binding.tvCreatorName, it.displayName)
+                            
+                            if (it.profilePictureUrl.isNotEmpty()) {
+                                Picasso.get()
+                                    .load(it.profilePictureUrl)
+                                    .placeholder(R.drawable.ic_person)
+                                    .error(R.drawable.ic_person)
+                                    .into(binding.ivCreatorImage)
+                            } else {
+                                binding.ivCreatorImage.setImageResource(R.drawable.ic_person)
+                            }
                         }
                     }
                 }
