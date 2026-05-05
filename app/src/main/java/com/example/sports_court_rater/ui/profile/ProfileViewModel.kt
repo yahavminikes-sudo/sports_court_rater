@@ -56,17 +56,13 @@ class ProfileViewModel @Inject constructor(
             
             try {
                 val courts = repository.getCourtsByCreatorId(userId)
+                    .sortedByDescending { it.date }
                 val reviews = repository.getReviewsByCreatorId(userId)
-                
-                for (review in reviews) {
-                    val court = repository.getCourtById(review.courtId)
-                    review.courtName = court?.courtName ?: "Unknown Court"
-                }
+                    .sortedByDescending { it.date }
                 
                 _userCourts.value = courts
                 _userReviews.value = reviews
             } catch (e: Exception) {
-
             } finally {
                 _isLoading.value = false
             }
