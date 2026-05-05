@@ -9,14 +9,13 @@ data class Review(
     val rating: Float = 0f,
     val comment: String = "",
     val date: String = "",
-) {
-    @get:Exclude
-    var creatorName: String = ""
-
-    @get:Exclude
-    var creatorImageUrl: String = ""
-
-    @get:Exclude
-    @set:Exclude
+    
+    @get:Exclude @set:Exclude 
+    var creatorName: String = "",
+    
+    @get:Exclude @set:Exclude 
+    var creatorImageUrl: String = "",
+    
+    @get:Exclude @set:Exclude 
     var courtName: String = ""
-}
+)

@@ -44,19 +44,21 @@ class CourtRepository @Inject constructor(
 
             courtDao.deleteAll()
             courtDao.insertAll(courts)
-            
+
             val userIds = courts.map { it.creatorId }.distinct()
             for (userId in userIds) {
-                fetchAndCacheUser(userId)
+                fetchAndCacheUser(userId, forceRefresh = true)
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    private suspend fun fetchAndCacheUser(userId: String): User? {
+    private suspend fun fetchAndCacheUser(userId: String, forceRefresh: Boolean = false): User? {
+        if (userId.isEmpty()) return null
         return try {
-            val userSnapshot = firestore.collection("users").document(userId).get().await()
+            val source = if (forceRefresh) Source.SERVER else Source.DEFAULT
+            val userSnapshot = firestore.collection("users").document(userId).get(source).await()
             val user = userSnapshot.toObject(User::class.java)
             if (user != null) {
                 userDao.insert(user)
@@ -67,15 +69,37 @@ class CourtRepository @Inject constructor(
         }
     }
 
+    private suspend fun fetchAndCacheCourt(courtId: String, forceRefresh: Boolean = false): Court? {
+        if (courtId.isEmpty()) return null
+        return try {
+            val source = if (forceRefresh) Source.SERVER else Source.DEFAULT
+            val snapshot = remoteDataSource.document(courtId).get(source).await()
+            val court = snapshot.toObject(Court::class.java)
+            if (court != null) {
+                courtDao.insert(court)
+            }
+            court
+        } catch (e: Exception) {
+            courtDao.getById(courtId)
+        }
+    }
+
     fun getAllCourts(): Flow<List<Court>> {
         return courtDao.getAll().map { courts ->
+            val userCache = mutableMapOf<String, User?>()
             for (court in courts) {
                 court.locationName = getLocationName(court.latitude, court.longitude)
                 court.averageRating = calculateAverageRating(court.id, court.rating)
-                val user = userDao.getUserById(court.creatorId)
+                
+                val user = userCache.getOrPut(court.creatorId) {
+                    userDao.getUserById(court.creatorId) ?: fetchAndCacheUser(court.creatorId)
+                }
+
                 if (user != null) {
                     court.creatorName = user.displayName
                     court.creatorImageUrl = user.profilePictureUrl
+                } else {
+                    court.creatorName = "Anonymous"
                 }
             }
             courts
@@ -84,7 +108,7 @@ class CourtRepository @Inject constructor(
 
     suspend fun getCourtById(id: String): Court? {
         return withContext(Dispatchers.IO) {
-            val court = courtDao.getById(id)
+            val court = courtDao.getById(id) ?: fetchAndCacheCourt(id)
             court?.let {
                 it.locationName = getLocationName(it.latitude, it.longitude)
                 it.averageRating = calculateAverageRating(it.id, it.rating)
@@ -92,6 +116,8 @@ class CourtRepository @Inject constructor(
                 if (user != null) {
                     it.creatorName = user.displayName
                     it.creatorImageUrl = user.profilePictureUrl
+                } else {
+                    it.creatorName = "Anonymous"
                 }
             }
             court
@@ -157,6 +183,8 @@ class CourtRepository @Inject constructor(
                 if (user != null) {
                     court.creatorName = user.displayName
                     court.creatorImageUrl = user.profilePictureUrl
+                } else {
+                    court.creatorName = "Anonymous"
                 }
             }
 
@@ -170,11 +198,13 @@ class CourtRepository @Inject constructor(
 
                 val finalCourts = if (remoteCourts.isNotEmpty()) remoteCourts else localCourts
                 for (court in finalCourts) {
-                    court.locationName = getLocationName(court.latitude, court.longitude) 
+                    court.locationName = getLocationName(court.latitude, court.longitude)
                     court.averageRating = calculateAverageRating(court.id, court.rating)
                     if (user != null) {
                         court.creatorName = user.displayName
                         court.creatorImageUrl = user.profilePictureUrl
+                    } else {
+                        court.creatorName = "Anonymous"
                     }
                 }
                 finalCourts
@@ -192,10 +222,21 @@ class CourtRepository @Inject constructor(
                 .await()
             val reviews = snapshot.toObjects(Review::class.java)
             val user = userDao.getUserById(creatorId) ?: fetchAndCacheUser(creatorId)
-            reviews.forEach {
+            
+            val courtCache = mutableMapOf<String, Court?>()
+            for (review in reviews) {
                 if (user != null) {
-                    it.creatorName = user.displayName
-                    it.creatorImageUrl = user.profilePictureUrl
+                    review.creatorName = user.displayName
+                    review.creatorImageUrl = user.profilePictureUrl
+                } else {
+                    review.creatorName = "Anonymous"
+                }
+
+                val court = courtCache.getOrPut(review.courtId) {
+                    fetchAndCacheCourt(review.courtId, forceRefresh = true)
+                }
+                if (court != null) {
+                    review.courtName = court.courtName
                 }
             }
             reviews
@@ -211,11 +252,22 @@ class CourtRepository @Inject constructor(
                 .get()
                 .await()
             val reviews = snapshot.toObjects(Review::class.java)
+
+            val court = courtDao.getById(courtId) ?: fetchAndCacheCourt(courtId)
+
+            val userCache = mutableMapOf<String, User?>()
             for (review in reviews) {
-                val user = userDao.getUserById(review.creatorId) ?: fetchAndCacheUser(review.creatorId)
+                val user = userCache.getOrPut(review.creatorId) {
+                    userDao.getUserById(review.creatorId) ?: fetchAndCacheUser(review.creatorId)
+                }
                 if (user != null) {
                     review.creatorName = user.displayName
                     review.creatorImageUrl = user.profilePictureUrl
+                } else {
+                    review.creatorName = "Anonymous"
+                }
+                if (court != null) {
+                    review.courtName = court.courtName
                 }
             }
             reviews
