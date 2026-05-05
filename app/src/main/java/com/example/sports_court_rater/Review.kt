@@ -17,3 +17,7 @@ data class Review(
     @get:Exclude
     var creatorImageUrl: String = ""
 }
+    @get:Exclude
+    @set:Exclude
+    var courtName: String = ""
+)

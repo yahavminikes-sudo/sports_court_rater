@@ -115,8 +115,7 @@ class CourtInfoViewModel @Inject constructor(
                     creatorId = currentUser.uid,
                     rating = rating,
                     comment = comment,
-                    date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()),
-                    courtName = currentCourt.courtName
+                    date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
                 )
                 repository.saveReview(review)
                 loadCourtDetails(currentCourt.id)

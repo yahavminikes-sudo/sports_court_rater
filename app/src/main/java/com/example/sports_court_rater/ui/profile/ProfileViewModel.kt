@@ -58,6 +58,11 @@ class ProfileViewModel @Inject constructor(
                 val courts = repository.getCourtsByCreatorId(userId)
                 val reviews = repository.getReviewsByCreatorId(userId)
                 
+                for (review in reviews) {
+                    val court = repository.getCourtById(review.courtId)
+                    review.courtName = court?.courtName ?: "Unknown Court"
+                }
+                
                 _userCourts.value = courts
                 _userReviews.value = reviews
             } catch (e: Exception) {

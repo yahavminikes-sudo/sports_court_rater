@@ -80,7 +80,9 @@ class CourtAdapter(
         }
 
         override fun areContentsTheSame(oldItem: Court, newItem: Court): Boolean {
-            return oldItem == newItem
+            return oldItem == newItem && 
+                   oldItem.locationName == newItem.locationName && 
+                   oldItem.averageRating == newItem.averageRating
         }
     }
 }
