@@ -143,12 +143,14 @@ class CourtInfoFragment : Fragment() {
         dialogBinding.tvCourtName.text = courtName
         TooltipCompat.setTooltipText(dialogBinding.tvCourtName, courtName)
         
-        reviewToEdit?.let {
-            dialogBinding.dialogRatingBar.rating = it.rating
-            dialogBinding.etComment.setText(it.comment)
+        if (reviewToEdit != null) {
+            dialogBinding.tvDialogTitle.text = getString(R.string.edit_review_dialog_title)
+            dialogBinding.dialogRatingBar.rating = reviewToEdit.rating
+            dialogBinding.etComment.setText(reviewToEdit.comment)
             dialogBinding.btnSubmit.text = getString(R.string.add_review_save_button)
-            dialogBinding.tvCharCount.text = "${it.comment.length}/500"
-        } ?: run {
+            dialogBinding.tvCharCount.text = "${reviewToEdit.comment.length}/500"
+        } else {
+            dialogBinding.tvDialogTitle.text = getString(R.string.add_review_dialog_title)
             dialogBinding.tvCharCount.text = "0/500"
         }
         
@@ -305,6 +307,16 @@ class CourtInfoFragment : Fragment() {
                         user?.let {
                             binding.tvCreatorName.text = it.displayName
                             TooltipCompat.setTooltipText(binding.tvCreatorName, it.displayName)
+                            
+                            if (it.profilePictureUrl.isNotEmpty()) {
+                                Picasso.get()
+                                    .load(it.profilePictureUrl)
+                                    .placeholder(R.drawable.ic_person)
+                                    .error(R.drawable.ic_person)
+                                    .into(binding.ivCreatorImage)
+                            } else {
+                                binding.ivCreatorImage.setImageResource(R.drawable.ic_person)
+                            }
                         }
                     }
                 }

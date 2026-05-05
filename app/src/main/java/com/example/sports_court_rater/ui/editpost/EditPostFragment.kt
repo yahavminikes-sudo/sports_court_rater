@@ -110,7 +110,6 @@ class EditPostFragment : Fragment() {
             
             btnPostCourt.text = "עדכון מגרש"
             
-            // In Edit mode, location cannot be updated
             etLocation.isEnabled = false
             btnCurrentLocation.isEnabled = false
             btnCurrentLocation.alpha = 0.5f

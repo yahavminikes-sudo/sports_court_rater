@@ -54,6 +54,8 @@ class SearchViewModel @Inject constructor(
             val matchesRating = effectiveRating >= minRating
 
             matchesQuery && matchesSport && matchesRating
+        }.sortedByDescending { court ->
+            if (court.averageRating > 0) court.averageRating else court.rating
         }
     }.stateIn(
         scope = viewModelScope,

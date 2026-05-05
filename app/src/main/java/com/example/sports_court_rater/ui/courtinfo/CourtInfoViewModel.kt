@@ -62,10 +62,11 @@ class CourtInfoViewModel @Inject constructor(
                 _isCreator.value = courtDetails.creatorId == auth.currentUser?.uid
                 fetchWeather(courtDetails.latitude, courtDetails.longitude)
                 
-                _creator.value = User(
+                val user = repository.getUserById(courtDetails.creatorId)
+                _creator.value = user ?: User(
                     userId = courtDetails.creatorId,
-                    displayName = courtDetails.creatorName.ifEmpty { "Anonymous" },
-                    profilePictureUrl = courtDetails.creatorImageUrl
+                    displayName = "Anonymous",
+                    profilePictureUrl = ""
                 )
                 
                 fetchReviews(courtId)
@@ -112,12 +113,9 @@ class CourtInfoViewModel @Inject constructor(
                     id = UUID.randomUUID().toString(),
                     courtId = currentCourt.id,
                     creatorId = currentUser.uid,
-                    creatorName = currentUser.displayName ?: "Anonymous",
-                    creatorImageUrl = currentUser.photoUrl?.toString() ?: "",
                     rating = rating,
                     comment = comment,
-                    date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()),
-                    courtName = currentCourt.courtName
+                    date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
                 )
                 repository.saveReview(review)
                 loadCourtDetails(currentCourt.id)

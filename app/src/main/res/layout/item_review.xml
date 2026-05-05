@@ -24,6 +24,7 @@
             android:ellipsize="end"
             android:fontFamily="sans-serif-black"
             android:gravity="start"
+            android:textDirection="rtl"
             android:maxLines="1"
             android:textColor="@color/black"
             android:textSize="16sp"

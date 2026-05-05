@@ -1,13 +1,21 @@
 package com.example.sports_court_rater
 
+import com.google.firebase.firestore.Exclude
+
 data class Review(
     val id: String = "",
     val courtId: String = "",
     val creatorId: String = "",
-    val creatorName: String = "",
-    val creatorImageUrl: String = "",
     val rating: Float = 0f,
     val comment: String = "",
     val date: String = "",
-    val courtName: String = "" // Helpful for profile display
+    
+    @get:Exclude @set:Exclude 
+    var creatorName: String = "",
+    
+    @get:Exclude @set:Exclude 
+    var creatorImageUrl: String = "",
+    
+    @get:Exclude @set:Exclude 
+    var courtName: String = ""
 )

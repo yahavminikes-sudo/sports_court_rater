@@ -303,17 +303,26 @@
                             android:layout_height="wrap_content"
                             android:padding="16dp">
 
-                            <ImageView
-                                android:id="@+id/ivCreatorImage"
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/mcvCreatorImage"
                                 android:layout_width="40dp"
                                 android:layout_height="40dp"
-                                android:background="@drawable/bg_circle_light_grey"
-                                android:contentDescription="@string/creator_image_desc"
-                                android:padding="4dp"
-                                android:src="@drawable/ic_person"
+                                app:cardCornerRadius="20dp"
+                                app:cardElevation="0dp"
+                                app:strokeWidth="0dp"
                                 app:layout_constraintBottom_toBottomOf="parent"
                                 app:layout_constraintStart_toStartOf="parent"
-                                app:layout_constraintTop_toTopOf="parent" />
+                                app:layout_constraintTop_toTopOf="parent">
+
+                                <ImageView
+                                    android:id="@+id/ivCreatorImage"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:background="@drawable/bg_circle_light_grey"
+                                    android:contentDescription="@string/creator_image_desc"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/ic_person" />
+                            </com.google.android.material.card.MaterialCardView>
 
                             <TextView
                                 android:id="@+id/tvCreatorLabel"
@@ -323,8 +332,8 @@
                                 android:text="@string/posted_by_label"
                                 android:textColor="#888888"
                                 android:textSize="12sp"
-                                app:layout_constraintStart_toEndOf="@id/ivCreatorImage"
-                                app:layout_constraintTop_toTopOf="@id/ivCreatorImage" />
+                                app:layout_constraintStart_toEndOf="@id/mcvCreatorImage"
+                                app:layout_constraintTop_toTopOf="@id/mcvCreatorImage" />
 
                             <TextView
                                 android:id="@+id/tvCreatorName"
@@ -337,7 +346,7 @@
                                 android:textStyle="bold"
                                 android:textDirection="rtl"
                                 app:layout_constraintEnd_toStartOf="@id/tvPostDate"
-                                app:layout_constraintStart_toEndOf="@id/ivCreatorImage"
+                                app:layout_constraintStart_toEndOf="@id/mcvCreatorImage"
                                 app:layout_constraintTop_toBottomOf="@id/tvCreatorLabel"
                                 tools:text="דני אברהם" />
 

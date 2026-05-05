@@ -30,19 +30,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupStatusBarAndNavigationBar() {
-        // Navigation bar color and light appearance (API 26+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             window.navigationBarColor = Color.WHITE
             val insetsController = WindowInsetsControllerCompat(window, window.decorView)
             insetsController.isAppearanceLightNavigationBars = true
         }
 
-        // Navigation bar divider color (API 28+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             try {
                 window.navigationBarDividerColor = "#1f000000".toColorInt()
             } catch (e: Exception) {
-                // Fallback for unexpected failures
+
             }
         }
     }
@@ -52,7 +50,6 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.nav_host_fragment) as? NavHostFragment ?: return
         val navController = navHostFragment.navController
         
-        // Setup dynamic start destination based on auth state before connecting to UI
         val navGraph = navController.navInflater.inflate(R.navigation.nav_graph)
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null) {
@@ -62,10 +59,8 @@ class MainActivity : AppCompatActivity() {
         }
         navController.graph = navGraph
 
-        // Connect BottomNavigationView with NavController
         binding.bottomNavigation.setupWithNavController(navController)
 
-        // Hide Bottom Navigation on Login/SignUp screens
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
                 R.id.loginFragment, R.id.signUpFragment -> {

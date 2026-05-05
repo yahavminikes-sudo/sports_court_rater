@@ -63,10 +63,6 @@ class AddCourtViewModel @Inject constructor(
         _imageUri.value = uri
     }
 
-    /**
-     * Publishes a new court post by uploading the image (if present),
-     * constructing the Court object, and saving it to Firebase.
-     */
     fun postCourt(name: String, description: String, rating: Float, manualLocation: String) {
         val sport = _selectedSport.value ?: "basketball"
         val uri = _imageUri.value
@@ -77,7 +73,6 @@ class AddCourtViewModel @Inject constructor(
                 var finalLat = _latitude.value
                 var finalLng = _longitude.value
 
-                // If user changed the location text or didn't use GPS, try to geocode the manual text
                 if (manualLocation != _locationName.value || finalLat == null || finalLng == null) {
                     val coords = courtRepository.getCoordinatesFromAddress(manualLocation)
                     if (coords != null) {
@@ -89,24 +84,18 @@ class AddCourtViewModel @Inject constructor(
                     }
                 }
 
-                // 1. Upload Image and retrieve download URL (Suspend function in Repository)
                 val imageUrl = if (uri != null) {
                     courtRepository.uploadImage(uri)
                 } else {
                     ""
                 }
 
-                // 2. Construct Court object (using UUID for ID)
                 val currentUser = authRepository.getCurrentUser()
                 val creatorId = currentUser?.uid ?: ""
-                val creatorName = currentUser?.displayName ?: "Anonymous"
-                val creatorImageUrl = currentUser?.photoUrl?.toString() ?: ""
                 
                 val court = Court(
                     id = UUID.randomUUID().toString(),
                     creatorId = creatorId,
-                    creatorName = creatorName,
-                    creatorImageUrl = creatorImageUrl,
                     courtName = name,
                     sportType = sport,
                     latitude = finalLat,
@@ -114,13 +103,11 @@ class AddCourtViewModel @Inject constructor(
                     imageUrl = imageUrl,
                     rating = rating,
                     description = description,
-                    date = null // Let Firestore fill this with @ServerTimestamp
+                    date = null
                 )
 
-                // 3. Save this new Court object to the remote Firebase database
                 courtRepository.saveCourt(court)
 
-                // 4. Notify UI via StateFlow when finished
                 _uiState.value = AddCourtState.Success
             } catch (e: Exception) {
                 _uiState.value = AddCourtState.Error(e.message ?: "An unexpected error occurred.")

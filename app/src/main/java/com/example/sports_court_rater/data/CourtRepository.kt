@@ -5,7 +5,9 @@ import android.location.Geocoder
 import android.net.Uri
 import com.example.sports_court_rater.Court
 import com.example.sports_court_rater.Review
+import com.example.sports_court_rater.User
 import com.example.sports_court_rater.data.local.CourtDao
+import com.example.sports_court_rater.data.local.UserDao
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Source
@@ -20,7 +22,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import java.util.Locale
-import java.util.UUID
 import javax.inject.Inject
 import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.ErrorInfo
@@ -29,40 +30,77 @@ import com.cloudinary.utils.ObjectUtils
 
 class CourtRepository @Inject constructor(
     private val courtDao: CourtDao,
+    private val userDao: UserDao,
     private val firestore: FirebaseFirestore,
     private val remoteDataSource: CollectionReference,
     private val storage: FirebaseStorage,
     @ApplicationContext private val context: Context
 ) {
 
-    /**
-     * Fetches the latest list of Court from Firebase (forcing server fetch)
-     * and inserts them into the Room database after clearing the local cache.
-     */
     suspend fun refreshCourts() {
         try {
-            // Force fetch from server to bypass Firebase's internal cache
             val snapshot = remoteDataSource.get(Source.SERVER).await()
             val courts = snapshot.toObjects(Court::class.java)
 
-            // Single source of truth: Update Room
             courtDao.deleteAll()
             courtDao.insertAll(courts)
+
+            val userIds = courts.map { it.creatorId }.distinct()
+            for (userId in userIds) {
+                fetchAndCacheUser(userId, forceRefresh = true)
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    /**
-     * Returns the data strictly from the Room DAO (local cache).
-     * Enriches courts with location names and average ratings on the fly.
-     */
+    private suspend fun fetchAndCacheUser(userId: String, forceRefresh: Boolean = false): User? {
+        if (userId.isEmpty()) return null
+        return try {
+            val source = if (forceRefresh) Source.SERVER else Source.DEFAULT
+            val userSnapshot = firestore.collection("users").document(userId).get(source).await()
+            val user = userSnapshot.toObject(User::class.java)
+            if (user != null) {
+                userDao.insert(user)
+            }
+            user
+        } catch (e: Exception) {
+            userDao.getUserById(userId)
+        }
+    }
+
+    private suspend fun fetchAndCacheCourt(courtId: String, forceRefresh: Boolean = false): Court? {
+        if (courtId.isEmpty()) return null
+        return try {
+            val source = if (forceRefresh) Source.SERVER else Source.DEFAULT
+            val snapshot = remoteDataSource.document(courtId).get(source).await()
+            val court = snapshot.toObject(Court::class.java)
+            if (court != null) {
+                courtDao.insert(court)
+            }
+            court
+        } catch (e: Exception) {
+            courtDao.getById(courtId)
+        }
+    }
+
     fun getAllCourts(): Flow<List<Court>> {
         return courtDao.getAll().map { courts ->
-            // Use a for loop to handle suspending calls within the suspending map block
+            val userCache = mutableMapOf<String, User?>()
             for (court in courts) {
                 court.locationName = getLocationName(court.latitude, court.longitude)
                 court.averageRating = calculateAverageRating(court.id, court.rating)
+                
+                val user = userCache.getOrPut(court.creatorId) {
+                    userDao.getUserById(court.creatorId) ?: fetchAndCacheUser(court.creatorId)
+                }
+
+                if (user != null) {
+                    court.creatorName = user.displayName
+                    court.creatorImageUrl = user.profilePictureUrl
+                } else {
+                    court.creatorName = "Anonymous"
+                }
             }
             courts
         }
@@ -70,10 +108,17 @@ class CourtRepository @Inject constructor(
 
     suspend fun getCourtById(id: String): Court? {
         return withContext(Dispatchers.IO) {
-            val court = courtDao.getById(id)
+            val court = courtDao.getById(id) ?: fetchAndCacheCourt(id)
             court?.let {
                 it.locationName = getLocationName(it.latitude, it.longitude)
                 it.averageRating = calculateAverageRating(it.id, it.rating)
+                val user = userDao.getUserById(it.creatorId) ?: fetchAndCacheUser(it.creatorId)
+                if (user != null) {
+                    it.creatorName = user.displayName
+                    it.creatorImageUrl = user.profilePictureUrl
+                } else {
+                    it.creatorName = "Anonymous"
+                }
             }
             court
         }
@@ -127,51 +172,74 @@ class CourtRepository @Inject constructor(
             }
         }
 
-    /**
-     * Fetches courts created by a specific user.
-     * Tries local cache first, then Firestore.
-     */
     suspend fun getCourtsByCreatorId(creatorId: String): List<Court> {
         return withContext(Dispatchers.IO) {
-            // 1. Check local cache first (guarantees newly created courts show up)
             val localCourts = courtDao.getByCreatorId(creatorId)
+            val user = userDao.getUserById(creatorId) ?: fetchAndCacheUser(creatorId)
+            
             for (court in localCourts) {
                 court.locationName = getLocationName(court.latitude, court.longitude)
                 court.averageRating = calculateAverageRating(court.id, court.rating)
+                if (user != null) {
+                    court.creatorName = user.displayName
+                    court.creatorImageUrl = user.profilePictureUrl
+                } else {
+                    court.creatorName = "Anonymous"
+                }
             }
 
-            // 2. Fetch from Firestore to sync
             try {
                 val snapshot = remoteDataSource.whereEqualTo("creatorId", creatorId).get().await()
                 val remoteCourts = snapshot.toObjects(Court::class.java)
 
-                // Update local cache if needed
                 if (remoteCourts.isNotEmpty()) {
                     courtDao.insertAll(remoteCourts)
                 }
 
                 val finalCourts = if (remoteCourts.isNotEmpty()) remoteCourts else localCourts
                 for (court in finalCourts) {
-                    court.locationName = getLocationName(court.latitude, court.longitude) 
+                    court.locationName = getLocationName(court.latitude, court.longitude)
                     court.averageRating = calculateAverageRating(court.id, court.rating)
+                    if (user != null) {
+                        court.creatorName = user.displayName
+                        court.creatorImageUrl = user.profilePictureUrl
+                    } else {
+                        court.creatorName = "Anonymous"
+                    }
                 }
                 finalCourts
             } catch (e: Exception) {
-                localCourts // Fallback to local on error
+                localCourts
             }
         }
     }
 
-    /**
-     * Fetches reviews created by a specific user from Firestore.
-     */
     suspend fun getReviewsByCreatorId(creatorId: String): List<Review> {
         return try {
             val snapshot = firestore.collection("reviews")
                 .whereEqualTo("creatorId", creatorId)
                 .get()
                 .await()
-            snapshot.toObjects(Review::class.java)
+            val reviews = snapshot.toObjects(Review::class.java)
+            val user = userDao.getUserById(creatorId) ?: fetchAndCacheUser(creatorId)
+            
+            val courtCache = mutableMapOf<String, Court?>()
+            for (review in reviews) {
+                if (user != null) {
+                    review.creatorName = user.displayName
+                    review.creatorImageUrl = user.profilePictureUrl
+                } else {
+                    review.creatorName = "Anonymous"
+                }
+
+                val court = courtCache.getOrPut(review.courtId) {
+                    fetchAndCacheCourt(review.courtId, forceRefresh = true)
+                }
+                if (court != null) {
+                    review.courtName = court.courtName
+                }
+            }
+            reviews
         } catch (e: Exception) {
             emptyList()
         }
@@ -183,7 +251,26 @@ class CourtRepository @Inject constructor(
                 .whereEqualTo("courtId", courtId)
                 .get()
                 .await()
-            snapshot.toObjects(Review::class.java)
+            val reviews = snapshot.toObjects(Review::class.java)
+
+            val court = courtDao.getById(courtId) ?: fetchAndCacheCourt(courtId)
+
+            val userCache = mutableMapOf<String, User?>()
+            for (review in reviews) {
+                val user = userCache.getOrPut(review.creatorId) {
+                    userDao.getUserById(review.creatorId) ?: fetchAndCacheUser(review.creatorId)
+                }
+                if (user != null) {
+                    review.creatorName = user.displayName
+                    review.creatorImageUrl = user.profilePictureUrl
+                } else {
+                    review.creatorName = "Anonymous"
+                }
+                if (court != null) {
+                    review.courtName = court.courtName
+                }
+            }
+            reviews
         } catch (e: Exception) {
             emptyList()
         }
@@ -220,17 +307,22 @@ class CourtRepository @Inject constructor(
         courtDao.insert(court)
     }
 
+    suspend fun saveUser(user: User) {
+        firestore.collection("users").document(user.userId).set(user).await()
+        userDao.insert(user)
+    }
+
+    suspend fun getUserById(userId: String): User? {
+        return userDao.getUserById(userId) ?: fetchAndCacheUser(userId)
+    }
+
     private fun extractPublicId(url: String): String? {
         try {
             val uploadIndex = url.indexOf("/upload/")
             if (uploadIndex == -1) return null
             val afterUpload = url.substring(uploadIndex + "/upload/".length)
-            
-            // Remove version tag if present (e.g., v1234567890/)
             val versionRegex = Regex("^v\\d+/")
             val withoutVersion = afterUpload.replaceFirst(versionRegex, "")
-            
-            // Remove extension
             val extensionIndex = withoutVersion.lastIndexOf('.')
             return if (extensionIndex != -1) {
                 withoutVersion.substring(0, extensionIndex)
@@ -242,17 +334,9 @@ class CourtRepository @Inject constructor(
         }
     }
 
-    /**
-     * Deletes the court record from Firestore and Room, and removes the image from Storage.
-     */
     suspend fun deleteCourt(courtId: String, imageUrl: String) {
-        // 1. Delete from Firestore
         remoteDataSource.document(courtId).delete().await()
-
-        // 2. Delete from Room
         courtDao.deleteById(courtId)
-
-        // 3. Delete image from Cloudinary if it exists
         if (imageUrl.isNotEmpty()) {
             try {
                 val publicId = extractPublicId(imageUrl)
@@ -262,7 +346,6 @@ class CourtRepository @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                // If the image is already gone or link is invalid, we proceed
                 e.printStackTrace()
             }
         }

@@ -3,6 +3,8 @@ package com.example.sports_court_rater.ui.signup
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sports_court_rater.AuthRepository
+import com.example.sports_court_rater.User
+import com.example.sports_court_rater.data.CourtRepository
 import com.example.sports_court_rater.ui.AuthState
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.userProfileChangeRequest
@@ -16,7 +18,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SignUpViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val courtRepository: CourtRepository
 ) : ViewModel() {
 
     private val _signUpState = MutableStateFlow<AuthState<FirebaseUser>>(AuthState.Idle)
@@ -33,6 +36,14 @@ class SignUpViewModel @Inject constructor(
                             this.displayName = displayName
                         }
                         user.updateProfile(profileUpdates).await()
+                        
+                        val newUser = User(
+                            userId = user.uid,
+                            displayName = displayName,
+                            profilePictureUrl = ""
+                        )
+                        courtRepository.saveUser(newUser)
+
                         AuthState.Success(user)
                     } catch (e: Exception) {
                         AuthState.Error(e.message ?: "Failed to update profile")
